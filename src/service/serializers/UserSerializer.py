@@ -6,6 +6,5 @@ class UserSerializer(BaseUserSerializer):
             'id',
             'username',
             'email',
-            'first_name',
-            'last_name'
+            'full_name'
         ]
