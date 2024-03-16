@@ -1,3 +1,2 @@
-from . import User
-from . import ProfileBase
-from . import AttendeeProfile
+from .User import User
+from .AttendeeProfile import AttendeeProfile
