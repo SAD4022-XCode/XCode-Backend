@@ -1,1 +1,1 @@
-from .AttendeeProfileCreateHandler import AttendeeProfileCreateHandler
+from .UserProfileCreateHandler import UserProfileCreateHandler

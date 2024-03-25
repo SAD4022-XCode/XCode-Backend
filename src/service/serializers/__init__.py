@@ -1,3 +1,3 @@
-from .AttendeeProfileSerializer import AttendeeProfileSerializer
+from .UserProfileSerializer import UserProfileSerializer
 from .UserCreateSerializer import UserCreateSerializer
 from .UserSerializer import UserSerializer

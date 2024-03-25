@@ -1,2 +1,2 @@
 from .User import User
-from .AttendeeProfile import AttendeeProfile
+from .UserProfile import UserProfile
