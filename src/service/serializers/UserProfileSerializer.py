@@ -1,25 +1,25 @@
 from rest_framework import serializers
 
 from data import models
+from service.serializers.UserSerializer import UserSerializer
 
 class UserProfileSerializer(serializers.ModelSerializer):
-    username = serializers.CharField(source = 'user.username')
-    firstname = serializers.CharField(source = 'user.first_name')
-    lastname = serializers.CharField(source = 'user.last_name')
-    email = serializers.EmailField(source = 'user.email')
-    profile_picture = serializers.ImageField(required = False)
-
-    # Implement custom update() method for updating user(relation) data
+    user = UserSerializer(many = False)
 
     class Meta:
         model = models.UserProfile
         fields = [
-            'firstname', 
-            'lastname', 
-            'username', 
-            'email', 
+            'user',
             'gender', 
             'city',
             'birth_date', 
             'profile_picture'
         ]
+
+    def update(self, instance, validated_data):
+        user_serializer = self.fields['user']
+        user_instance = instance.user
+        user_data = validated_data.pop('user', {})
+
+        user_serializer.update(user_instance, user_data)
+        return super().update(instance, validated_data)
