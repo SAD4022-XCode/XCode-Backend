@@ -15,7 +15,7 @@ class UserListViewSet(ModelViewSet):
     parser_classes = [MultiPartParser, FormParser]
 
     @action(detail=False, methods=['GET'], permission_classes = [AllowAny])
-    def userprofiles(self, request: HttpRequest):
+    def user_list(self, request: HttpRequest):
         users = UserProfile.objects.select_related('user').all()
 
         if (request.method == 'GET'):
