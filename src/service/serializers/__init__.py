@@ -1,3 +1,4 @@
 from .UserProfileSerializer import UserProfileSerializer
+from .ProfilePictureSerializer import ProfilePictureSerializer
 from .UserCreateSerializer import UserCreateSerializer
 from .UserSerializer import UserSerializer
