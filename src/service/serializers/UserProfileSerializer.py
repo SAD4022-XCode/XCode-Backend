@@ -4,7 +4,7 @@ from data import models
 from service.serializers.UserSerializer import UserSerializer
 
 class UserProfileSerializer(serializers.ModelSerializer):
-    user = UserSerializer(many = False)
+    user = UserSerializer(many = False, partial = True)
 
     class Meta:
         model = models.UserProfile
@@ -20,6 +20,6 @@ class UserProfileSerializer(serializers.ModelSerializer):
         user_serializer = self.fields['user']
         user_instance = instance.user
         user_data = validated_data.pop('user', {})
-
         user_serializer.update(user_instance, user_data)
+
         return super().update(instance, validated_data)
