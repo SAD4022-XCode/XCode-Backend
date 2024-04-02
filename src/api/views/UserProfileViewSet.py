@@ -21,7 +21,6 @@ class UserProfileViewSet(ModelViewSet):
         'set_profile_picture': serializers.ProfilePictureSerializer
     }
 
-    #Implement PATCH
 
     def get_serializer_class(self):
         try:
@@ -76,3 +75,11 @@ class UserProfileViewSet(ModelViewSet):
         if (request.method == 'DELETE'):
             profile.delete_profile_picture()
             return Response('Profile photo was deleted.', status = status.HTTP_204_NO_CONTENT)
+
+    # @action(detail = False, methods = ['GET'], permission_classes = [permissions.IsAuthenticated])    
+    # def created_events(self, request):
+    #     events = Event.objects.filter(creator_id = request.user.id)
+    #     serializer = EventSerializer(events, many = True)
+
+    #     return Response(serializer.data)
+        

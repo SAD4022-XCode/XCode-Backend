@@ -13,7 +13,6 @@ class UserProfileSerializer(serializers.ModelSerializer):
             'gender', 
             'city',
             'birth_date', 
-            'profile_picture'
         ]
 
     def update(self, instance, validated_data):
