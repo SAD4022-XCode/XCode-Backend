@@ -21,6 +21,7 @@ class UserProfile(models.Model):
     user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete = models.CASCADE, primary_key = True)
     birth_date = models.DateField(null = True)
     city = models.CharField(max_length = 255, blank = True)
+    province = models.CharField(max_length = 255, blank = True)
     profile_picture = models.ImageField(upload_to = 'images/', blank = True, null = True)
     gender = models.CharField(max_length = 1, 
                               choices = GENDER_CHOICES, 

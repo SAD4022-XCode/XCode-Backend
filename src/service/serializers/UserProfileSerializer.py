@@ -12,6 +12,7 @@ class UserProfileSerializer(serializers.ModelSerializer):
             'user',
             'gender', 
             'city',
+            'province',
             'birth_date', 
         ]
 
