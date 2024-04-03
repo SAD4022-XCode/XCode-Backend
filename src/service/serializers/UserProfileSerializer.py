@@ -14,6 +14,7 @@ class UserProfileSerializer(serializers.ModelSerializer):
             'city',
             'province',
             'birth_date', 
+            'profile_picture'
         ]
 
     def update(self, instance, validated_data):
@@ -21,5 +22,8 @@ class UserProfileSerializer(serializers.ModelSerializer):
         user_instance = instance.user
         user_data = validated_data.pop('user', {})
         user_serializer.update(user_instance, user_data)
+
+        if ('profile_picture' in validated_data):
+            instance.profile_picture.delete(save = True)
 
         return super().update(instance, validated_data)
