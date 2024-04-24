@@ -6,7 +6,7 @@ from rest_framework import permissions
 from rest_framework import status
 from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
 
-from data.models import UserProfile
+from data.models import UserProfile, Event
 from service import serializers
 
 class UserProfileViewSet(ModelViewSet):
@@ -76,10 +76,10 @@ class UserProfileViewSet(ModelViewSet):
             profile.delete_profile_picture()
             return Response('Profile photo was deleted.', status = status.HTTP_204_NO_CONTENT)
 
-    # @action(detail = False, methods = ['GET'], permission_classes = [permissions.IsAuthenticated])    
-    # def created_events(self, request):
-    #     events = Event.objects.filter(creator_id = request.user.id)
-    #     serializer = EventSerializer(events, many = True)
+    @action(detail = False, methods = ['GET'], permission_classes = [permissions.IsAuthenticated])    
+    def my_events(self, request):
+        events = Event.objects.filter(creator_id = request.user.id)
+        serializer = serializers.EventSerializer(events, many = True)
 
-    #     return Response(serializer.data)
+        return Response(serializer.data)
         
