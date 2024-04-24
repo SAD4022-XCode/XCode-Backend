@@ -1,8 +1,9 @@
 from rest_framework import serializers
 
-from data.models import Event, OnlineEvent, InPersonEvent
+from data.models import Event, InPersonEvent, OnlineEvent
 
 class EventSerializer(serializers.ModelSerializer):
+    remaining_tickets = serializers.IntegerField(read_only = True, required = False)
 
     class Meta:
         model = Event
