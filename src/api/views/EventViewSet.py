@@ -74,7 +74,6 @@ class EventViewSet(ModelViewSet):
                                                  context = {"user_id": request.user.id})                                   
             serializer.is_valid(raise_exception = True)
             serializer.save()
-        #    return Response(serializer.data)
         
         elif event_data["event"]["attendance"] == 'O':
             serializer = serializers.OnlineEventSerializer()
@@ -91,11 +90,6 @@ class EventViewSet(ModelViewSet):
             tag_data = data.pop("tags", {})
             for tag in tag_data:
                 EventTag.objects.create(tag = tag_data[tag], event_id = serializer.data["event"].get("id"))
-                # if (new_tag is not None):
-                #     new_tag.save()
-            # tag_serializer = EventTagSerializer(data = tag_data, context = {"event_id": serializer.data["event"].get("id")})
-            # tag_serializer.is_valid(raise_exception = True)
-            # tag_serializer.save()
         
         return Response(serializer.data) 
         
@@ -119,9 +113,18 @@ class EventViewSet(ModelViewSet):
             serializer = serializers.OnlineEventSerializer(event)
             return Response(serializer.data) 
 
-    @action(detail = False, methods = ['DELETE'], permission_classes = [IsAuthenticated])
-    def delete_event(self, request, *args, **kwargs):
-        return super().destroy(request, *args, **kwargs)
+    def destroy(self, request, *args, **kwargs):
+        permission_classes = [IsAuthenticated]
+        lookup_url_kwarg = self.lookup_url_kwarg or self.lookup_field
+        filter_kwargs = {self.lookup_field: self.kwargs[lookup_url_kwarg]}
+
+        instance = Event.objects.get(pk = filter_kwargs.get("pk"))
+        if instance.creator_id != request.user.id:
+            return Response(status = status.HTTP_401_UNAUTHORIZED)
+        
+        instance.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+    
         
 
         
