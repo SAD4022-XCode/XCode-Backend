@@ -3,7 +3,6 @@ from rest_framework import routers
 from . import views  
 
 urlpatterns = [
-    # path("swagger/", views.SwaggerSchemaView.as_view(), name = "swagger"),
     path("all_users/", views.UserList, name = "all"),
 ]
 
