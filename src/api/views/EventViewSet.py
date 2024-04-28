@@ -7,7 +7,7 @@ from rest_framework import status
 from django.http import HttpRequest
 
 from data.models import Event, InPersonEvent, OnlineEvent
-from service.serializers import EventSerializer, CreateEventSerializer, EventInfoSerializer, InPersonEventSerializer, OnlineEventSerializer
+from service.serializers import EventSerializer, CreateEventSerializer, EventInfoSerializer, InPersonEventSerializer, OnlineEventSerializer, EventTagSerializer
 
 class EventViewSet(ModelViewSet):
     queryset = Event.objects.all()
@@ -33,12 +33,9 @@ class EventViewSet(ModelViewSet):
         serializer = self.get_serializer(self.queryset, many = True)
         return Response(serializer.data)
 
-    # @action(detail = False, methods = ['POST'])
     def retrieve(self, request: HttpRequest, *args, **kwargs):
         lookup_url_kwarg = self.lookup_url_kwarg or self.lookup_field
         filter_kwargs = {self.lookup_field: self.kwargs[lookup_url_kwarg]}
-
-        lookup = filter_kwargs.get("pk")
 
         instance = Event.objects.get(pk = filter_kwargs.get("pk"))
 
@@ -62,9 +59,9 @@ class EventViewSet(ModelViewSet):
 
         for key in data:
             if key in EventSerializer().get_fields().keys():
-                event_data["event"][key] = data[key]
+                event_data["event"][key] = data[key]                
 
-        if event_data["event"]["attendance"] == 'I':
+        if event_data.get("event").get("attendance") == 'I':
             serializer = InPersonEventSerializer()
             for key in data:
                 if (key in serializer.get_fields().keys()):
@@ -73,7 +70,7 @@ class EventViewSet(ModelViewSet):
                                                  context = {"user_id": request.user.id})                                   
             serializer.is_valid(raise_exception = True)
             serializer.save()
-            return Response(serializer.data)
+        #    return Response(serializer.data)
         
         elif event_data["event"]["attendance"] == 'O':
             serializer = OnlineEventSerializer()
@@ -84,7 +81,19 @@ class EventViewSet(ModelViewSet):
                                                context = {"user_id": request.user.id})
             serializer.is_valid(raise_exception = True)
             serializer.save()
-            return Response(serializer.data) 
+        
+        if "tags" in data:
+            from data.models import EventTag
+            tag_data = data.pop("tags", {})
+            for tag in tag_data:
+                EventTag.objects.create(tag = tag_data[tag], event_id = serializer.data["event"].get("id"))
+                # if (new_tag is not None):
+                #     new_tag.save()
+            # tag_serializer = EventTagSerializer(data = tag_data, context = {"event_id": serializer.data["event"].get("id")})
+            # tag_serializer.is_valid(raise_exception = True)
+            # tag_serializer.save()
+        
+        return Response(serializer.data) 
         
     @action(detail = False, methods = ["PUT"], permission_classes = [IsAuthenticated])
     def update_event(self, request: HttpRequest):
