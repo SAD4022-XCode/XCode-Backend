@@ -3,7 +3,7 @@ from .ProfilePictureSerializer import ProfilePictureSerializer
 from .UserCreateSerializer import UserCreateSerializer
 from .UserSerializer import UserSerializer
 from .EventSerializer import EventSerializer, CreateEventSerializer, EventInfoSerializer, OnlineEventSerializer, InPersonEventSerializer
-from .TagSerializer import TagSerializer, TaggedEvent
+from .EventTagSerializer import EventTagSerializer
 
 __all__ = [
     UserProfileSerializer,
@@ -15,6 +15,6 @@ __all__ = [
     OnlineEventSerializer,
     InPersonEventSerializer,
     EventInfoSerializer,
-    TagSerializer,
-    TaggedEvent,
+    EventTagSerializer,
+    
 ]
