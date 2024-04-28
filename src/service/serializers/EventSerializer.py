@@ -27,6 +27,16 @@ class EventSerializer(serializers.ModelSerializer):
             "photo",
         ]
 
+    def to_representation(self, instance):
+        representation = super().to_representation(instance)
+        tags = models.EventTag.objects.get_tags_for_event(instance.id)
+        from service.serializers import EventTagSerializer
+
+        serializer = EventTagSerializer(tags, many = True)
+        representation["tags"] = serializer.data
+
+        return representation
+
 class EventInfoSerializer(serializers.Serializer):
     event = EventSerializer(read_only = True)
     url = serializers.URLField(required = False)
@@ -71,12 +81,12 @@ class OnlineEventSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         event_data = validated_data.pop("event")
+
         event = models.Event.objects.create(creator_id = self.context.get("user_id"), **event_data)
-
-        in_person_event = models.OnlineEvent.objects.create(event = event, **validated_data)
-        event.save()
-        in_person_event.save()
-
+        online_event = models.OnlineEvent.objects.create(event = event, **validated_data)
+        
+        return online_event
+        
 class InPersonEventSerializer(serializers.ModelSerializer):
     event = EventSerializer(partial = True)
 
@@ -93,8 +103,8 @@ class InPersonEventSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         event_data = validated_data.pop("event")
-        event = models.Event.objects.create(creator_id = self.context.get("user_id"), **event_data)
 
+        event = models.Event.objects.create(creator_id = self.context.get("user_id"), **event_data)
         in_person_event = models.InPersonEvent.objects.create(event = event, **validated_data)  
 
         return in_person_event
