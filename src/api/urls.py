@@ -1,10 +1,16 @@
+from django.urls import path
 from rest_framework import routers
 from . import views  
+
+urlpatterns = [
+    # path("swagger/", views.SwaggerSchemaView.as_view(), name = "swagger"),
+    path("all_users/", views.UserList, name = "all"),
+]
 
 router = routers.DefaultRouter()
 
 router.register("account", views.UserProfileViewSet, basename = "account")
-router.register("", views.UserListViewSet, basename = "list")
-router.register("event", views.EventViewSet, basename = "event")
-urlpatterns = router.urls
+router.register("events", views.EventViewSet, basename = "events")
+
+urlpatterns += router.urls
 

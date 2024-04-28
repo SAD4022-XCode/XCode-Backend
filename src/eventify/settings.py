@@ -60,11 +60,25 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "rest_framework",
+    "drf_yasg",
     "corsheaders",
     "djoser",
     "data",
     "service",
 ]
+
+SWAGGER_SETTINGS = {
+    'SECURITY_DEFINITIONS': {
+        'Bearer': {
+            'type': 'apiKey',
+            'name': 'Authorization',
+            'in': 'header'
+        },
+        'basic': {
+        'type': 'basic' 
+        },
+    }
+}
 
 ROOT_URLCONF = "eventify.urls"
 
@@ -157,12 +171,13 @@ REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": (
         "rest_framework_simplejwt.authentication.JWTAuthentication",
     ),
+    "DEFAULT_SCHEMA_CLASS": "rest_framework.schemas.coreapi.AutoSchema",
 }
 
 DJOSER = {
     "SERIALIZERS": {
         "user_create": "service.serializers.UserCreateSerializer",
-        "current_user": "service.serializers.UserSerializer",
+        "current_user": "service.serializers.MyUserSerializer",
     }
 }
 
