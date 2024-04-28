@@ -1,16 +1,16 @@
-from djoser.serializers import UserSerializer as BaseUserSerializer
+from djoser.serializers import UserSerializer 
 from rest_framework import serializers
 
 from data.models import User
 
-class UserSerializer(BaseUserSerializer):
+class MyUserSerializer(UserSerializer):
     id = serializers.IntegerField(read_only = True)
     first_name = serializers.CharField(read_only = True)
     last_name = serializers.CharField(read_only = True)
     email = serializers.CharField(read_only = True)
     username = serializers.CharField(read_only = False)
 
-    class Meta(BaseUserSerializer.Meta):
+    class Meta(UserSerializer.Meta):
         fields = [
             'id',
             'first_name',

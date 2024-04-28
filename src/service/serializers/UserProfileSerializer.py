@@ -1,10 +1,10 @@
 from rest_framework import serializers
 
 from data import models
-from service.serializers.UserSerializer import UserSerializer
+from service.serializers.MyUserSerializer import MyUserSerializer
 
 class UserProfileSerializer(serializers.ModelSerializer):
-    user = UserSerializer(many = False, partial = True)
+    user = MyUserSerializer(many = False, partial = True)
 
     class Meta:
         model = models.UserProfile
