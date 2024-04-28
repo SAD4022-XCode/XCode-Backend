@@ -1,9 +1,11 @@
 from .UserProfileViewSet import UserProfileViewSet
-from .UserListViewSet import UserListViewSet
+from .UserListView import UserList
 from .EventViewSet import EventViewSet
+from .SwaggerSchemaView import SwaggerSchemaView
 
 __all__ = [
     UserProfileViewSet,
-    UserListViewSet,
     EventViewSet,
+    SwaggerSchemaView,
+    UserList,
 ]
