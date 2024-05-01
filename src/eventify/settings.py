@@ -107,23 +107,25 @@ WSGI_APPLICATION = "eventify.wsgi.application"
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
 
-DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.mysql",
-        "NAME": "eventify",
-        "USER": "root",
-        "PASSWORD": "h7LTdAd9XH7UwGj1wb6wxByM",
-        "HOST": "eventify-db",
-        "PORT": "3306",
+if DEBUG:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': 'Eventify.sqlite3'
+        }
     }
-}
 
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.sqlite3',
-#         'NAME': 'Eventify.sqlite3'
-#     }
-# }
+else:
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.mysql",
+            "NAME": "eventify",
+            "USER": "root",
+            "PASSWORD": "h7LTdAd9XH7UwGj1wb6wxByM",
+            "HOST": "eventify-db",
+            "PORT": "3306",
+        }
+    }
 
 
 # Password validation
