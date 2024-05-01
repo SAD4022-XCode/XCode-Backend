@@ -23,6 +23,7 @@ class UserProfile(models.Model):
     city = models.CharField(max_length = 255, blank = True)
     province = models.CharField(max_length = 255, blank = True)
     profile_picture = models.ImageField(upload_to = 'images/', blank = True, null = True)
+    wallet = models.IntegerField(default = 0)
     gender = models.CharField(max_length = 1, 
                               choices = GENDER_CHOICES, 
                               default = GENDER_UNKNOWN)
