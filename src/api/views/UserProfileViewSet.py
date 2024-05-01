@@ -34,7 +34,7 @@ class UserProfileViewSet(GenericViewSet):
     @swagger_auto_schema(method = "get", operation_summary = "Display user info")
     @swagger_auto_schema(method = "put", operation_summary = "Update user info")
     @swagger_auto_schema(method = "patch", operation_summary = "Update User Info")
-    @action(detail = False, methods = ['GET', 'PUT', 'PATCH'], permission_classes = [permissions.AllowAny])
+    @action(detail = False, methods = ['GET', 'PUT', 'PATCH'], permission_classes = [permissions.IsAuthenticated])
     def me(self, request: HttpRequest):
         profile = UserProfile.objects.get_by_id(request.user.id)
 
