@@ -10,6 +10,7 @@ from drf_yasg.utils import swagger_auto_schema
 
 from data.models import UserProfile, Event
 from service import serializers
+from service.serializers import event_serializers
 
 class UserProfileViewSet(GenericViewSet):
     queryset = UserProfile.objects.select_related('user').all()
@@ -87,7 +88,7 @@ class UserProfileViewSet(GenericViewSet):
     @action(detail = False, methods = ['GET'], permission_classes = [permissions.IsAuthenticated])    
     def my_events(self, request):
         events = Event.objects.filter(creator_id = request.user.id)
-        serializer = serializers.EventSerializer(events, many = True)
+        serializer = event_serializers.EventSummarySerializer(events, many = True)
 
         return Response(serializer.data)
         
