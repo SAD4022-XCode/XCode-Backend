@@ -4,6 +4,7 @@ from rest_framework.response import Response
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework import status
+from rest_framework.pagination import PageNumberPagination
 from django.http import HttpRequest
 from django.utils.decorators import method_decorator
 from django.db import transaction
@@ -15,10 +16,16 @@ from data.models import Event
 from service.serializers import event_serializers
 from service import serializers
 
+class CustomPagination(PageNumberPagination):
+    page_size = 12
+    page_query_param = "page"
+    max_page_size = 12
+
 class EventViewSet(ModelViewSet):
     queryset = Event.objects.all()
     serializer_class = event_serializers.EventSerializer
     parser_classes = [JSONParser, MultiPartParser]
+    pagination_class = CustomPagination
 
     serializer_action_classes = {
         "create_event": event_serializers.CreateEventSerializer,
