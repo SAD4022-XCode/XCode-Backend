@@ -27,6 +27,10 @@ class Event(models.Model):
     @property
     def remaining_tickets(self):
         return self.maximum_tickets - self.registered_tickets
+    
+    @property
+    def start_date(self):
+        return self.starts.date()
 
 class InPersonEvent(models.Model):
     event = models.OneToOneField(Event, 
