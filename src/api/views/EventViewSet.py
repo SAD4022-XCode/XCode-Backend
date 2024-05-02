@@ -4,28 +4,22 @@ from rest_framework.response import Response
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework import status
-from rest_framework.pagination import PageNumberPagination
 from django.http import HttpRequest
-from django.utils.decorators import method_decorator
 from django.db import transaction
-from django.shortcuts import get_object_or_404
 
 from drf_yasg.utils import swagger_auto_schema
 
 from data.models import Event
 from service.serializers import event_serializers
 from service import serializers
+from service import pagination
 
-class CustomPagination(PageNumberPagination):
-    page_size = 12
-    page_query_param = "page"
-    max_page_size = 12
 
 class EventViewSet(ModelViewSet):
     queryset = Event.objects.all()
     serializer_class = event_serializers.EventSerializer
     parser_classes = [JSONParser, MultiPartParser]
-    pagination_class = CustomPagination
+    pagination_class = pagination.CustomPagination
 
     serializer_action_classes = {
         "create_event": event_serializers.CreateEventSerializer,
@@ -52,7 +46,7 @@ class EventViewSet(ModelViewSet):
 
         serializer = self.get_serializer(queryset, many=True)
         return Response(serializer.data)
-
+    
     @swagger_auto_schema(operation_summary = "Event details")
     @transaction.atomic
     def retrieve(self, request: HttpRequest, *args, **kwargs):
@@ -95,7 +89,6 @@ class EventViewSet(ModelViewSet):
             serializer.save()
         
         if "tags" in data:
-            from data.models import EventTag
             tag_data = data.pop("tags", {})
             for tag in tag_data:
                 tag_serializer = serializers.EventTagSerializer(data = {"tag": tag},
