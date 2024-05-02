@@ -1,5 +1,4 @@
 from django.db import models
-from django.core import validators
 
 from data.models import User
 
@@ -31,7 +30,7 @@ class Event(models.Model):
     @property
     def start_date(self):
         return self.starts.date()
-
+    
 class InPersonEvent(models.Model):
     event = models.OneToOneField(Event, 
                                  on_delete = models.CASCADE, 
