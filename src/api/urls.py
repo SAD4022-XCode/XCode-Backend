@@ -4,7 +4,6 @@ from . import views
 
 urlpatterns = [
     path("all_users/", views.UserList, name = "all"),
-    path("filter", views.EventListView.as_view(), name = "filter")
 ]
 
 router = routers.DefaultRouter()
