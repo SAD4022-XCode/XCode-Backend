@@ -6,20 +6,23 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework import status
 from django.http import HttpRequest
 from django.db import transaction
+from django_filters import rest_framework as filters
 
 from drf_yasg.utils import swagger_auto_schema
 
-from data.models import Event
+from data import models
 from service.serializers import event_serializers
 from service import serializers
 from service import pagination
-
+from service.filters import EventFilter
 
 class EventViewSet(ModelViewSet):
-    queryset = Event.objects.all()
+    queryset = models.Event.objects.all()
     serializer_class = event_serializers.EventSerializer
     parser_classes = [JSONParser, MultiPartParser]
     pagination_class = pagination.CustomPagination
+    filter_backends = [filters.DjangoFilterBackend]
+    filterset_class = EventFilter
 
     serializer_action_classes = {
         "create_event": event_serializers.CreateEventSerializer,
@@ -27,6 +30,7 @@ class EventViewSet(ModelViewSet):
         "update": event_serializers.EventDetailSerializer,
         "partial_update": event_serializers.EventDetailSerializer,
         "retrieve": event_serializers.EventDetailSerializer,
+        "tags" : serializers.EventTagSerializer,
     }
 
     def get_serializer_class(self):
@@ -37,14 +41,22 @@ class EventViewSet(ModelViewSet):
         
     @swagger_auto_schema(operation_summary = "List of all events")
     def list(self, request, *args, **kwargs):
-        queryset = Event.objects.select_related("inpersonevent", "onlineevent")
+        queryset = models.Event.objects.select_related("inpersonevent", "onlineevent")
 
-        page = self.paginate_queryset(queryset)
+        start = request.GET.get("starts")
+        end = request.GET.get("ends")
+        date_filter = EventFilter({"starts_after": start, "ends_before": end})
+        filtered_queryset = date_filter.qs
+        filter = EventFilter(request.GET, queryset = filtered_queryset)
+        filtered_queryset = filter.qs
+
+
+        page = self.paginate_queryset(filtered_queryset)
         if page is not None:
             serializer = self.get_serializer(page, many=True)
             return self.get_paginated_response(serializer.data)
 
-        serializer = self.get_serializer(queryset, many=True)
+        serializer = self.get_serializer(filtered_queryset, many=True)
         return Response(serializer.data)
     
     @swagger_auto_schema(operation_summary = "Event details")
@@ -54,11 +66,11 @@ class EventViewSet(ModelViewSet):
         filter_kwargs = {self.lookup_field: self.kwargs[lookup_url_kwarg]}
         
         try:
-            instance = Event.objects \
+            instance = models.Event.objects \
                 .select_related("inpersonevent", "onlineevent") \
                 .get(pk = filter_kwargs.get("pk"))
         
-        except Event.objects.model.DoesNotExist:
+        except models.Event.objects.model.DoesNotExist:
             return Response(status = status.HTTP_404_NOT_FOUND)
         
         serializer = self.get_serializer(instance)
@@ -126,9 +138,9 @@ class EventViewSet(ModelViewSet):
         filter_kwargs = {self.lookup_field: self.kwargs[lookup_url_kwarg]}
 
         try:
-            instance = Event.objects.get(pk = filter_kwargs.get("pk"))
+            instance = models.Event.objects.get(pk = filter_kwargs.get("pk"))
 
-        except Event.objects.model.DoesNotExist:
+        except models.Event.objects.model.DoesNotExist:
             return Response(status = status.HTTP_404_NOT_FOUND)
 
         if instance.creator_id != request.user.id:
