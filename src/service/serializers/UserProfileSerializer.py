@@ -10,6 +10,9 @@ class UserProfileSerializer(serializers.ModelSerializer):
         model = models.UserProfile
         fields = [
             'user',
+            'ssn',
+            'phone',
+            'balance',
             'gender', 
             'city',
             'province',

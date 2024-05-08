@@ -19,6 +19,9 @@ def upload_path(instance, filename):
 
 class UserProfile(models.Model):
     user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete = models.CASCADE, primary_key = True)
+    ssn = models.CharField(max_length = 10, blank = True)
+    phone = models.CharField(max_length = 15, blank = True)
+    balance = models.PositiveIntegerField(default = 0)
     birth_date = models.DateField(null = True)
     city = models.CharField(max_length = 255, blank = True)
     province = models.CharField(max_length = 255, blank = True)
