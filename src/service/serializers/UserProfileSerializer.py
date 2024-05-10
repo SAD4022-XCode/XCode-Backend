@@ -15,6 +15,7 @@ class UserProfileSerializer(serializers.ModelSerializer):
             'province',
             'birth_date', 
             'profile_picture'
+            'wallet'
         ]
 
     def update(self, instance, validated_data):
