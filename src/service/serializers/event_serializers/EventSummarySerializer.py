@@ -13,6 +13,8 @@ class EventSummarySerializer(serializers.ModelSerializer):
     photo = serializers.ImageField()
     province = serializers.CharField(max_length = 255, source = "inpersonevent.province")
     city = serializers.CharField(max_length = 255, source = "inpersonevent.city")
+    tags = serializers.SlugRelatedField(many = True, slug_field = "label", 
+                                        queryset = models.Tag.objects.all())
 
     class Meta:
         model = models.Event
@@ -27,4 +29,5 @@ class EventSummarySerializer(serializers.ModelSerializer):
             "photo",
             "province",
             "city",
+            "tags",
         ]
