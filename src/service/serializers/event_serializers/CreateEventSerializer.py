@@ -17,11 +17,11 @@ class CreateEventSerializer(serializers.Serializer):
     url = serializers.URLField(required = False)
     province = serializers.CharField(max_length = 255, required = False)
     city = serializers.CharField(max_length = 255, required = False)
-    address = serializers.CharField(max_length = 255)
+    address = serializers.CharField(max_length = 255, required = False)
     location_lat = serializers.DecimalField(max_digits = 9, decimal_places = 6, required = False)
     location_lon = serializers.DecimalField(max_digits = 9, decimal_places = 6, required = False)
 
-    tags = serializers.ListField()
+    tags = serializers.ListField(required = False)
 
 
     
