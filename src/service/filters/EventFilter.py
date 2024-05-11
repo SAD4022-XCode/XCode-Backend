@@ -1,11 +1,12 @@
 from django_filters import rest_framework
+from django import forms
 
 from data import models
 
 class EventFilter(rest_framework.FilterSet):
     starts = rest_framework.IsoDateTimeFromToRangeFilter()
     ends = rest_framework.IsoDateTimeFromToRangeFilter()
-    eventtag = rest_framework.AllValuesFilter()
+    tags = rest_framework.filters.ModelMultipleChoiceFilter(queryset = models.Tag.objects.all(), )
 
     class Meta:
         model = models.Event
@@ -14,5 +15,5 @@ class EventFilter(rest_framework.FilterSet):
             "is_paid",
             "starts",
             "ends",
-            "eventtag",
+            "tags",
         ]
