@@ -90,4 +90,50 @@ class UserProfileViewSet(GenericViewSet):
         serializer = serializers.EventSerializer(events, many = True)
 
         return Response(serializer.data)
+    
+    ########## my code ###########
+
+    # def signup(self, request):
+    #     data = request.data
+    #     if len(data.keys() & {'email', 'name', 'username', 'password'}) == 4:
+    #         try:
+    #             account = UserProfile.objects.get(pk=data['username'])
+    #             return Response({'msg': 'This username already exist'}, status.HTTP_406_NOT_ACCEPTABLE)
+    #         except UserProfile.DoesNotExist:
+    #             serializer = self.get_serializer(data=data)
+    #             if serializer.is_valid():
+    #                 serializer.save()
+    #                 ag = AccountGeneric(
+    #                     account = AccountBasic.objects.get(pk=data['username']))
+    #                 ag.save()
+    #                 return Response({'msg': 'You are successfully registered'}, status.HTTP_200_OK)
+    #             else:
+    #                 return Response({'msg': 'something wrong :('}, status.HTTP_406_NOT_ACCEPTABLE)
+    #     content = {'msg': 'Not valid Data'}
+    #     return(Response(content, status.HTTP_406_NOT_ACCEPTABLE))
+
+
+    # def login(request):
+    #     data = request.data
+    #     if len(data.keys() & {'username', 'password'}) >= 2:
+    #         try:
+    #             account = AccountBasic.objects.get(pk=data['username'])
+    #             if account.password == data["password"]:
+    #                 token = ''.join(random.choice(
+    #                     string.ascii_uppercase + string.digits) for _ in range(100))
+    #                 logged_in_account = LoggInBasic(
+    #                     account=account, token=token, token_gen_time=datetime.datetime.now())
+    #                 logged_in_account.save()
+    #                 return Response({'msg': 'successfull', 'token': token}, status.HTTP_200_OK)
+    #             else:
+    #                 return Response({'msg': 'Invalid username/password. \t please try again'}, status.HTTP_406_NOT_ACCEPTABLE)
+
+    #         except AccountBasic.DoesNotExist:
+    #             return Response({'msg': 'Invalid username/password'}, status.HTTP_406_NOT_ACCEPTABLE)
+
+    #     content = {'msg': 'Not valid Data'}
+    #     return(Response(content, status.HTTP_406_NOT_ACCEPTABLE))
+
+
+
         
