@@ -1,4 +1,10 @@
 {
     "platform": "django",
-    "app": "eventify"
+    "app": "eventify",
+    "disks": [
+        {
+          "name": "eventify-media",
+          "mountTo": "media"
+        }
+      ]
 }
