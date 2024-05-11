@@ -3,12 +3,10 @@ from rest_framework import serializers
 from data import models
 
 class InPersonEventSerializer(serializers.ModelSerializer):
-    # event = EventSerializer(partial = True)
 
     class Meta:
         model = models.InPersonEvent
         fields = [
-            # "event",
             "province",
             "city",
             "address",

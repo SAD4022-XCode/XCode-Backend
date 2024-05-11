@@ -3,7 +3,6 @@ from rest_framework import serializers
 from data import models
 
 class OnlineEventSerializer(serializers.ModelSerializer):
-    # event = EventSerializer(many = False)
     
     class Meta:
         model = models.OnlineEvent
