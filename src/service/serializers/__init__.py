@@ -2,7 +2,7 @@ from .UserProfileSerializer import UserProfileSerializer
 from .ProfilePictureSerializer import ProfilePictureSerializer
 from .UserCreateSerializer import UserCreateSerializer
 from .MyUserSerializer import MyUserSerializer
-from .EventTagSerializer import EventTagSerializer
+from .TagSerializer import TagSerializer
 from .event_serializers import __all__
 
 __all__ = [
@@ -10,6 +10,6 @@ __all__ = [
     ProfilePictureSerializer,
     UserCreateSerializer,
     MyUserSerializer,
-    EventTagSerializer,
+    TagSerializer,
     
 ]
