@@ -1,6 +1,7 @@
 from django.db import models
 
 from data.models import User
+from data.models.Tag import Tag
 
 ATTENDANCE_CHOICES = [
     ('I', 'InPerson'),
@@ -21,6 +22,7 @@ class Event(models.Model):
     ticket_price = models.DecimalField(max_digits = 6, decimal_places = 2, null = True)
     organizer_phone = models.CharField(max_length = 11) # + Validation
     organizer_SSN = models.CharField(max_length = 11)
+    tags = models.ManyToManyField(Tag)
     photo = models.ImageField(upload_to = "events/", blank = True, null = True)
     
     @property
