@@ -1,7 +1,7 @@
 from .User import User
 from .UserProfile import UserProfile
 from .Event import Event, OnlineEvent, InPersonEvent
-from .EventTag import EventTag
+from .Tag import Tag
 
 __all__ = [
     User,
@@ -9,5 +9,5 @@ __all__ = [
     Event,
     OnlineEvent,
     InPersonEvent,
-    EventTag,
+    Tag,
 ]
