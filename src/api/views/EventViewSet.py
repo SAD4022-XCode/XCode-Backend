@@ -7,17 +7,21 @@ from rest_framework import status
 from django.http import HttpRequest
 from django.db import transaction
 from django_filters import rest_framework as filters
+from django import shortcuts
+from datetime import datetime, timezone
 
 from drf_yasg.utils import swagger_auto_schema
 
 from data import models
 from service.serializers import event_serializers
-from service import serializers
 from service import pagination
 from service.filters import EventFilter
 
 class EventViewSet(ModelViewSet):
-    queryset = models.Event.objects.all()
+    queryset = models.Event.objects \
+        .select_related("inpersonevent", "onlineevent", "creator") \
+        .prefetch_related("tags") \
+        .all()
     serializer_class = event_serializers.EventSerializer
     parser_classes = [JSONParser, MultiPartParser]
     pagination_class = pagination.CustomPagination
@@ -30,7 +34,6 @@ class EventViewSet(ModelViewSet):
         "update": event_serializers.EventDetailSerializer,
         "partial_update": event_serializers.EventDetailSerializer,
         "retrieve": event_serializers.EventDetailSerializer,
-        "tags" : serializers.EventTagSerializer,
     }
 
     def get_serializer_class(self):
@@ -41,15 +44,19 @@ class EventViewSet(ModelViewSet):
         
     @swagger_auto_schema(operation_summary = "List of all events")
     def list(self, request, *args, **kwargs):
-        queryset = models.Event.objects.select_related("inpersonevent", "onlineevent")
-
         start = request.GET.get("starts")
         end = request.GET.get("ends")
         date_filter = EventFilter({"starts_after": start, "ends_before": end})
         filtered_queryset = date_filter.qs
+
         filter = EventFilter(request.GET, queryset = filtered_queryset)
         filtered_queryset = filter.qs
+        
+        if (request.GET.get("tags") is not None):
+            tag_list = request.GET.get("tags").strip().split(', ')
 
+            tags = models.Tag.objects.filter(label__in = tag_list)
+            filtered_queryset = filtered_queryset.filter(tags__in = tags).distinct()
 
         page = self.paginate_queryset(filtered_queryset)
         if page is not None:
@@ -58,32 +65,64 @@ class EventViewSet(ModelViewSet):
 
         serializer = self.get_serializer(filtered_queryset, many=True)
         return Response(serializer.data)
-    
+        
     @swagger_auto_schema(operation_summary = "Event details")
     @transaction.atomic
     def retrieve(self, request: HttpRequest, *args, **kwargs):
         lookup_url_kwarg = self.lookup_url_kwarg or self.lookup_field
         filter_kwargs = {self.lookup_field: self.kwargs[lookup_url_kwarg]}
-        
-        try:
-            instance = models.Event.objects \
-                .select_related("inpersonevent", "onlineevent") \
-                .get(pk = filter_kwargs.get("pk"))
-        
-        except models.Event.objects.model.DoesNotExist:
-            return Response(status = status.HTTP_404_NOT_FOUND)
-        
+
+        queryset = self.get_queryset()
+        instance = shortcuts.get_object_or_404(queryset, pk = filter_kwargs.get("pk"))
+
         serializer = self.get_serializer(instance)
+        return Response(serializer.data)            
+    
+    @swagger_auto_schema(operation_summary = "Update event")
+    @transaction.atomic
+    def update(self, request, *args, **kwargs):
+        partial = kwargs.pop('partial', False)
+        instance = self.get_object()
+
+        if instance.creator_id != request.user.id:
+            return Response({"detail": "operation not allowed, you are not the creator of this event"},
+                            status = status.HTTP_403_FORBIDDEN)
+        
+        if datetime.now(tz = timezone.utc) > instance.starts:
+            return Response({"detail": "operation not allowed, the event has started"}, 
+                            status = status.HTTP_403_FORBIDDEN)
+
+
+        tags = request.data.get("tags")
+        for tag in tags:
+            models.Tag.objects.get_or_create(label = tag)
+
+        serializer = self.get_serializer(instance, data = request.data, partial = partial)
+        serializer.is_valid(raise_exception = True)
+        self.perform_update(serializer)
+
+        if getattr(instance, '_prefetched_objects_cache', None):
+            instance._prefetched_objects_cache = {}
+
         return Response(serializer.data)
     
+    @swagger_auto_schema(operation_summary = "Partial-update event")
+    @transaction.atomic
+    def partial_update(self, request, *args, **kwargs):
+        kwargs['partial'] = True
+        return self.update(request, *args, **kwargs)
+
     @swagger_auto_schema(method = "post", operation_summary = "Create a new event")
     @transaction.atomic
     @action(detail = False, methods = ['POST'], permission_classes = [IsAuthenticated])
     def create_event(self, request: HttpRequest):
         data = request.data
-
+        tags = data.pop("tags", {})
         event_serializer = event_serializers.EventSerializer(data = data, 
-                                                             context = {"user_id": request.user.id})
+                                                             context = {
+                                                                 "user_id": request.user.id,
+                                                                 "tags": tags,
+                                                                        })
         event_serializer.is_valid(raise_exception = True)
         event_serializer.save()
         event_id = event_serializer.data.get("id")
@@ -100,54 +139,28 @@ class EventViewSet(ModelViewSet):
             serializer.is_valid(raise_exception = True)
             serializer.save()
         
-        if "tags" in data:
-            tag_data = data.pop("tags", {})
-            for tag in tag_data:
-                tag_serializer = serializers.EventTagSerializer(data = {"tag": tag},
-                                                                context = {"event_id": event_id})      
-                tag_serializer.is_valid(raise_exception = True)
-                tag_serializer.save()
-                    
-        return Response(serializer.data) 
+        return Response(event_serializer.data.get("id")) 
         
-    @action(detail = False, methods = ["PUT"], permission_classes = [IsAuthenticated])
-    @transaction.atomic
-    def update_event(self, request: HttpRequest):
-        if request.data.get("attendance") == 'I':
-            serializer = event_serializers.InPersonEventSerializer(data = request.data,
-                                                 partial = True,
-                                                 context = {"user_id": request.user.id})
-            serializer.is_valid(raise_exception = True)
-            event = serializer.save()
-            serializer = event_serializers.InPersonEventSerializer(event)
-            return Response(serializer.data)
-        
-        elif request.data.get("attendance") == 'O':
-            serializer = event_serializers.OnlineEventSerializer(data = request.data,
-                                               parial = True,
-                                               context = {"user_id": request.user.id})
-            serializer.is_valid(raise_exception = True)
-            event = serializer.save()
-            serializer = event_serializers.OnlineEventSerializer(event)
-            return Response(serializer.data) 
-
     @transaction.atomic
     def destroy(self, request, *args, **kwargs):
         permission_classes = [IsAuthenticated]
         lookup_url_kwarg = self.lookup_url_kwarg or self.lookup_field
         filter_kwargs = {self.lookup_field: self.kwargs[lookup_url_kwarg]}
 
-        try:
-            instance = models.Event.objects.get(pk = filter_kwargs.get("pk"))
+        queryset = self.get_queryset()
 
-        except models.Event.objects.model.DoesNotExist:
-            return Response(status = status.HTTP_404_NOT_FOUND)
+        instance = shortcuts.get_object_or_404(queryset, pk = filter_kwargs.get("pk"))
 
         if instance.creator_id != request.user.id:
-            return Response(status = status.HTTP_401_UNAUTHORIZED)
+            return Response({"detail": "operation not allowed, you are not the creator of this event"}, 
+                            status = status.HTTP_403_FORBIDDEN)
         
+        if datetime.now(tz = timezone.utc) > instance.starts:
+            return Response({"detail": "operation not allowed, the event has started"}, 
+                            status = status.HTTP_403_FORBIDDEN)
+
         instance.delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
+        return Response(status = status.HTTP_204_NO_CONTENT)
     
         
 
