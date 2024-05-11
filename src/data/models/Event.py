@@ -40,8 +40,8 @@ class InPersonEvent(models.Model):
     province = models.CharField(max_length = 255)
     city = models.CharField(max_length = 255)
     address = models.CharField(max_length = 255)
-    location_lat = models.DecimalField(max_digits = 22, decimal_places = 20)
-    location_lon = models.DecimalField(max_digits = 22, decimal_places = 20)
+    location_lat = models.DecimalField(max_digits = 12, decimal_places = 10)
+    location_lon = models.DecimalField(max_digits = 12, decimal_places = 10)
 
 class OnlineEvent(models.Model):
     event = models.OneToOneField(Event, 
