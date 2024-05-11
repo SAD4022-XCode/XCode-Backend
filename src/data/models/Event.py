@@ -19,7 +19,7 @@ class Event(models.Model):
     maximum_tickets = models.IntegerField()
     registered_tickets = models.IntegerField(default = 0)
     is_paid = models.BooleanField(default = False)
-    ticket_price = models.DecimalField(max_digits = 10, decimal_places = 2, null = True)
+    ticket_price = models.IntegerField(null = True)
     organizer_phone = models.CharField(max_length = 11)
     organizer_SSN = models.CharField(max_length = 11)
     tags = models.ManyToManyField(Tag)
@@ -40,8 +40,8 @@ class InPersonEvent(models.Model):
     province = models.CharField(max_length = 255)
     city = models.CharField(max_length = 255)
     address = models.CharField(max_length = 255)
-    location_lat = models.DecimalField(max_digits = 12, decimal_places = 10)
-    location_lon = models.DecimalField(max_digits = 12, decimal_places = 10)
+    location_lat = models.DecimalField(max_digits = 17, decimal_places = 15)
+    location_lon = models.DecimalField(max_digits = 18, decimal_places = 15)
 
 class OnlineEvent(models.Model):
     event = models.OneToOneField(Event, 
