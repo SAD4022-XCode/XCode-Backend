@@ -117,7 +117,7 @@ class EventViewSet(ModelViewSet):
     @action(detail = False, methods = ['POST'], permission_classes = [IsAuthenticated])
     def create_event(self, request: HttpRequest):
         data = request.data
-        tags = data.pop("tags", {})
+        tags = data.get("tags")
         event_serializer = event_serializers.EventSerializer(data = data, 
                                                              context = {
                                                                  "user_id": request.user.id,
