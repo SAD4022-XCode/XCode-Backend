@@ -9,6 +9,7 @@ from django.db import transaction
 from django_filters import rest_framework as filters
 from django import shortcuts
 from datetime import datetime, timezone
+import json
 
 from drf_yasg.utils import swagger_auto_schema
 
@@ -117,7 +118,7 @@ class EventViewSet(ModelViewSet):
     @action(detail = False, methods = ['POST'], permission_classes = [IsAuthenticated])
     def create_event(self, request: HttpRequest):
         data = request.data
-        tags = data.get("tags")
+        tags = json.loads(data.get("tags"))
         event_serializer = event_serializers.EventSerializer(data = data, 
                                                              context = {
                                                                  "user_id": request.user.id,
