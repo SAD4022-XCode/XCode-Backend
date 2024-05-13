@@ -1,4 +1,5 @@
 from rest_framework.viewsets import ModelViewSet
+from django.views.generic import DetailView
 from rest_framework.parsers import JSONParser, MultiPartParser
 from rest_framework.response import Response
 from rest_framework.decorators import action
@@ -15,8 +16,18 @@ from drf_yasg.utils import swagger_auto_schema
 
 from data import models
 from service.serializers import event_serializers
+from service import serializers
 from service import pagination
 from service.filters import EventFilter
+
+class EventDetails(DetailView):
+    model = models.Event
+
+    @swagger_auto_schema(operation_description = "leave a comment")
+    def post(self, request, *args, **kwargs):
+        if request.method == "POST":
+            serializer = event_serializers.EventDetailSerializer
+            return Response("OK")
 
 class EventViewSet(ModelViewSet):
     queryset = models.Event.objects \
@@ -35,6 +46,7 @@ class EventViewSet(ModelViewSet):
         "update": event_serializers.EventDetailSerializer,
         "partial_update": event_serializers.EventDetailSerializer,
         "retrieve": event_serializers.EventDetailSerializer,
+        "leave_comment": serializers.CommentSerializer
     }
 
     def get_serializer_class(self):
@@ -82,6 +94,9 @@ class EventViewSet(ModelViewSet):
     @swagger_auto_schema(operation_summary = "Update event")
     @transaction.atomic
     def update(self, request, *args, **kwargs):
+        if not request.user.is_authenticated:
+            return Response({"detail": "Authentication credentials were not provided"},
+                            status = status.HTTP_401_UNAUTHORIZED)
         partial = kwargs.pop('partial', False)
         instance = self.get_object()
 
@@ -92,7 +107,6 @@ class EventViewSet(ModelViewSet):
         if datetime.now(tz = timezone.utc) > instance.starts:
             return Response({"detail": "operation not allowed, the event has started"}, 
                             status = status.HTTP_403_FORBIDDEN)
-
 
         tags = request.data.get("tags")
         for tag in tags:
@@ -110,9 +124,13 @@ class EventViewSet(ModelViewSet):
     @swagger_auto_schema(operation_summary = "Partial-update event")
     @transaction.atomic
     def partial_update(self, request, *args, **kwargs):
+        if not request.user.is_authenticated:
+            return Response({"detail": "Authentication credentials were not provided"},
+                            status = status.HTTP_401_UNAUTHORIZED)
+
         kwargs['partial'] = True
         return self.update(request, *args, **kwargs)
-
+            
     @swagger_auto_schema(method = "post", operation_summary = "Create a new event")
     @transaction.atomic
     @action(detail = False, methods = ['POST'], permission_classes = [IsAuthenticated])
@@ -144,7 +162,10 @@ class EventViewSet(ModelViewSet):
         
     @transaction.atomic
     def destroy(self, request, *args, **kwargs):
-        permission_classes = [IsAuthenticated]
+        if not request.user.is_authenticated:
+            return Response({"detail": "Authentication credentials were not provided"},
+                            status = status.HTTP_401_UNAUTHORIZED)
+        
         lookup_url_kwarg = self.lookup_url_kwarg or self.lookup_field
         filter_kwargs = {self.lookup_field: self.kwargs[lookup_url_kwarg]}
 
