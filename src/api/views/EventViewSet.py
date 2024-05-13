@@ -1,9 +1,7 @@
 from rest_framework.viewsets import ModelViewSet
-from django.views.generic import DetailView
 from rest_framework.parsers import JSONParser, MultiPartParser
 from rest_framework.response import Response
 from rest_framework.decorators import action
-from rest_framework.permissions import IsAuthenticated
 from rest_framework import status
 from django.http import HttpRequest
 from django.db import transaction
@@ -20,15 +18,6 @@ from service import serializers
 from service import pagination
 from service.filters import EventFilter
 
-class EventDetails(DetailView):
-    model = models.Event
-
-    @swagger_auto_schema(operation_description = "leave a comment")
-    def post(self, request, *args, **kwargs):
-        if request.method == "POST":
-            serializer = event_serializers.EventDetailSerializer
-            return Response("OK")
-
 class EventViewSet(ModelViewSet):
     queryset = models.Event.objects \
         .select_related("inpersonevent", "onlineevent", "creator") \
@@ -41,12 +30,13 @@ class EventViewSet(ModelViewSet):
     filterset_class = EventFilter
 
     serializer_action_classes = {
-        "create_event": event_serializers.CreateEventSerializer,
+        "create": event_serializers.CreateEventSerializer,
         "list": event_serializers.EventSummarySerializer,
         "update": event_serializers.EventDetailSerializer,
         "partial_update": event_serializers.EventDetailSerializer,
         "retrieve": event_serializers.EventDetailSerializer,
-        "leave_comment": serializers.CommentSerializer
+        "leave_comment": serializers.CreateCommentSerializer,
+        "comments": serializers.CommentSerializer,
     }
 
     def get_serializer_class(self):
@@ -54,7 +44,7 @@ class EventViewSet(ModelViewSet):
             return self.serializer_action_classes[self.action]
         except(KeyError, AttributeError):
             return super().get_serializer_class()
-        
+
     @swagger_auto_schema(operation_summary = "List of all events")
     def list(self, request, *args, **kwargs):
         start = request.GET.get("starts")
@@ -78,7 +68,39 @@ class EventViewSet(ModelViewSet):
 
         serializer = self.get_serializer(filtered_queryset, many=True)
         return Response(serializer.data)
+
+    @swagger_auto_schema(operation_summary = "Create a new event")
+    @transaction.atomic
+    def create(self, request, *args, **kwargs):
+        if not request.user.is_authenticated:
+            return Response({"detail": "Authentication credentials were not provided"},
+                            status = status.HTTP_401_UNAUTHORIZED)
+
+        data = request.data
+        tags = json.loads(data.get("tags"))
+        event_serializer = event_serializers.EventSerializer(data = data, 
+                                                             context = {
+                                                                 "user_id": request.user.id,
+                                                                 "tags": tags,
+                                                                        })
+        event_serializer.is_valid(raise_exception = True)
+        event_serializer.save()
+        event_id = event_serializer.data.get("id")
+
+        if data.get("attendance") == 'I':
+            serializer = event_serializers.InPersonEventSerializer(data = data,
+                                                 context = {"event_id": event_id})                                   
+            serializer.is_valid(raise_exception = True)
+            serializer.save()
         
+        elif data.get("attendance") == 'O':
+            serializer = event_serializers.OnlineEventSerializer(data = data, 
+                                               context = {"event_id": event_id})
+            serializer.is_valid(raise_exception = True)
+            serializer.save()
+        
+        return Response(event_serializer.data.get("id")) 
+
     @swagger_auto_schema(operation_summary = "Event details")
     @transaction.atomic
     def retrieve(self, request: HttpRequest, *args, **kwargs):
@@ -131,35 +153,7 @@ class EventViewSet(ModelViewSet):
         kwargs['partial'] = True
         return self.update(request, *args, **kwargs)
             
-    @swagger_auto_schema(method = "post", operation_summary = "Create a new event")
-    @transaction.atomic
-    @action(detail = False, methods = ['POST'], permission_classes = [IsAuthenticated])
-    def create_event(self, request: HttpRequest):
-        data = request.data
-        tags = json.loads(data.get("tags"))
-        event_serializer = event_serializers.EventSerializer(data = data, 
-                                                             context = {
-                                                                 "user_id": request.user.id,
-                                                                 "tags": tags,
-                                                                        })
-        event_serializer.is_valid(raise_exception = True)
-        event_serializer.save()
-        event_id = event_serializer.data.get("id")
-
-        if data.get("attendance") == 'I':
-            serializer = event_serializers.InPersonEventSerializer(data = data,
-                                                 context = {"event_id": event_id})                                   
-            serializer.is_valid(raise_exception = True)
-            serializer.save()
-        
-        elif data.get("attendance") == 'O':
-            serializer = event_serializers.OnlineEventSerializer(data = data, 
-                                               context = {"event_id": event_id})
-            serializer.is_valid(raise_exception = True)
-            serializer.save()
-        
-        return Response(event_serializer.data.get("id")) 
-        
+    @swagger_auto_schema(operation_summary = "Delete an event")
     @transaction.atomic
     def destroy(self, request, *args, **kwargs):
         if not request.user.is_authenticated:
@@ -183,6 +177,26 @@ class EventViewSet(ModelViewSet):
 
         instance.delete()
         return Response(status = status.HTTP_204_NO_CONTENT)
+    
+    @swagger_auto_schema(operation_summary = "List of comments under event")
+    @action(detail = True, methods = ["GET"])
+    def comments(self, request, pk = None):
+        queryset = models.Comment.objects.filter(event_id = pk)
+        serializer = self.get_serializer(queryset, many = True)
+        return Response({"comments": serializer.data})
+
+    @swagger_auto_schema(operation_summary = "Leave a comment under event")
+    @action(detail = True, methods = ["POST"])    
+    def leave_comment(self, request, pk = None):
+        serializer = self.get_serializer(data = request.data, 
+                                         context = {
+                                            "user_id": request.user.id,
+                                            "event_id": pk,
+                                         })
+        serializer.is_valid(raise_exception=True)
+        instance = serializer.save()
+        headers = self.get_success_headers(serializer.data)
+        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
     
         
 
