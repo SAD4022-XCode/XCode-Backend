@@ -10,7 +10,6 @@ class CommentListSerializer(serializers.ModelSerializer):
     parent = serializers.PrimaryKeyRelatedField(queryset = models.Comment.objects.all())
     user_photo = serializers.ImageField(source = "user.userprofile.profile_picture")
     username = serializers.CharField(source = "user.username")
-    replies = AppSerializers.CommentSerializer(source = "children", many = True)
 
     class Meta:
         model = models.Comment
@@ -24,5 +23,4 @@ class CommentListSerializer(serializers.ModelSerializer):
             "created_at",
             "score",
             "text",
-            "replies",
         ]
