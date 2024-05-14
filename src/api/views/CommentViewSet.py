@@ -20,8 +20,8 @@ class CommentViewSet(viewsets.ModelViewSet):
     pagination_class = pagination.CustomPagination
 
     serializer_action_classes = {
-        "list": serializers.CommentListSerializer,
-        "retrieve": serializers.CommentListSerializer,
+        "list": serializers.CommentSerializer,
+        "retrieve": serializers.CommentSerializer,
         "create": serializers.CreateCommentSerializer,
         "update": serializers.CreateCommentSerializer,
         "partial_update": serializers.CreateCommentSerializer,
@@ -52,7 +52,15 @@ class CommentViewSet(viewsets.ModelViewSet):
 
     @swagger_auto_schema(operation_summary = "List of all comments")
     def list(self, request, *args, **kwargs):
-        return super().list(request, *args, **kwargs)
+        queryset = self.filter_queryset(self.get_queryset()).filter(parent_id = None)
+
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data)
     
     @swagger_auto_schema(operation_summary = "Retrieve a comment")
     def retrieve(self, request, *args, **kwargs):

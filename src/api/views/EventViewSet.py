@@ -5,6 +5,7 @@ from rest_framework.decorators import action
 from rest_framework import status
 from django.http import HttpRequest
 from django.db import transaction
+from django.db.models import Q
 from django_filters import rest_framework as filters
 from django import shortcuts
 from datetime import datetime, timezone
@@ -36,7 +37,7 @@ class EventViewSet(ModelViewSet):
         "partial_update": event_serializers.EventDetailSerializer,
         "retrieve": event_serializers.EventDetailSerializer,
         "leave_comment": serializers.CreateCommentSerializer,
-        "comments": serializers.CommentListSerializer,
+        "comments": serializers.CommentSerializer,
     }
 
     def get_serializer_class(self):
@@ -181,7 +182,7 @@ class EventViewSet(ModelViewSet):
     @swagger_auto_schema(operation_summary = "List of comments under event")
     @action(detail = True, methods = ["GET"])
     def comments(self, request, pk = None):
-        queryset = models.Comment.objects.filter(event_id = pk)
+        queryset = models.Comment.objects.filter(Q(event_id = pk) & Q(parent_id = None))
         serializer = self.get_serializer(queryset, many = True)
         return Response({"comments": serializer.data})    
         
