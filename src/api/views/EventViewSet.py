@@ -183,21 +183,7 @@ class EventViewSet(ModelViewSet):
     def comments(self, request, pk = None):
         queryset = models.Comment.objects.filter(event_id = pk)
         serializer = self.get_serializer(queryset, many = True)
-        return Response({"comments": serializer.data})
-
-    @swagger_auto_schema(operation_summary = "Leave a comment under event")
-    @action(detail = True, methods = ["POST"])    
-    def leave_comment(self, request, pk = None):
-        serializer = self.get_serializer(data = request.data, 
-                                         context = {
-                                            "user_id": request.user.id,
-                                            "event_id": pk,
-                                         })
-        serializer.is_valid(raise_exception=True)
-        instance = serializer.save()
-        headers = self.get_success_headers(serializer.data)
-        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
-    
+        return Response({"comments": serializer.data})    
         
 
         
