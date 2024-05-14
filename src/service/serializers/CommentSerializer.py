@@ -24,3 +24,9 @@ class CommentSerializer(serializers.ModelSerializer):
             "score",
             "text",
         ]
+
+    def to_representation(self, instance):
+        representation = super().to_representation(instance)
+        serializer = CommentSerializer(instance.children.prefetch_related("children").all(), many = True)
+        representation["replies"] = serializer.data
+        return representation
