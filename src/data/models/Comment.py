@@ -13,8 +13,8 @@ class Comment(models.Model):
     created_at = models.DateTimeField(auto_now_add = True)
     score = models.IntegerField(default = 0)
     parent = models.ForeignKey("self",
-                                    on_delete = models.CASCADE,
-                                    null = True,
-                                    blank = True,
-                                    related_name = "children")
-    
+                                on_delete = models.CASCADE,
+                                null = True,
+                                blank = True,
+                                related_name = "children")
+    liked_by = models.ManyToManyField(AppModels.User)
