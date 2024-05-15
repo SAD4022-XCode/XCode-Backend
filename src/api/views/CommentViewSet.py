@@ -14,7 +14,7 @@ from service import serializers
 from service import pagination
 
 class CommentViewSet(viewsets.ModelViewSet):
-    queryset = models.Comment.objects.prefetch_related("children").all()
+    queryset = models.Comment.objects.prefetch_related("children", "liked_by").select_related("user", "event").all()
     serializer_class = serializers.CommentSerializer
     parser_classes = [parsers.JSONParser, parsers.MultiPartParser]
     pagination_class = pagination.CustomPagination
@@ -56,15 +56,22 @@ class CommentViewSet(viewsets.ModelViewSet):
 
         page = self.paginate_queryset(queryset)
         if page is not None:
-            serializer = self.get_serializer(page, many=True)
+            serializer = self.get_serializer(page, 
+                                             many = True, 
+                                             context = {"request_user": request.user.id})
             return self.get_paginated_response(serializer.data)
 
-        serializer = self.get_serializer(queryset, many=True)
+        serializer = self.get_serializer(queryset, 
+                                         many = True, 
+                                         context = {"request_user": request.user.id})
         return Response(serializer.data)
     
     @swagger_auto_schema(operation_summary = "Retrieve a comment")
     def retrieve(self, request, *args, **kwargs):
-        return super().retrieve(request, *args, **kwargs)
+        instance = self.get_object()
+        serializer = self.get_serializer(instance, 
+                                         context = {"request_user": request.user.id})
+        return Response(serializer.data)
     
     def update(self, request, *args, **kwargs):
         if not request.user.is_authenticated:
@@ -78,7 +85,7 @@ class CommentViewSet(viewsets.ModelViewSet):
             return Response({"detail": "operation not allowed, you are not the creator of this comment"},
                             status = status.HTTP_403_FORBIDDEN)
 
-        serializer = self.get_serializer(instance, data=request.data, partial=partial)
+        serializer = self.get_serializer(instance, data = request.data, partial = partial)
         serializer.is_valid(raise_exception=True)
         self.perform_update(serializer)
 
@@ -127,6 +134,13 @@ class CommentViewSet(viewsets.ModelViewSet):
     @action(detail = True, methods = ["POST"], permission_classes =  [permissions.IsAuthenticated])
     def like(self, request, pk = None):
         queryset = self.get_queryset()
-        queryset.filter(pk = pk).update(score = F("score") + 1)
+        instance = queryset.get(pk = pk)
+        if instance.liked_by.filter(pk = request.user.id).exists():
+            instance.liked_by.remove(request.user)
+            instance.score -= 1
+        else:
+            instance.liked_by.add(request.user)
+            instance.score += 1
+        instance.save()
         return Response(status = status.HTTP_204_NO_CONTENT)
     
