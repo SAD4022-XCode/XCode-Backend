@@ -27,8 +27,24 @@ SECRET_KEY = "django-insecure-^&#8#9$*__ql5mges-he$^t#p^sn_lzy@bczfdlh^c_-=d6$zm
 DEBUG = True
 
 # Application definition
-CORS_ALLOW_CRIDENTIALS = True
+CORS_ALLOW_CRIDENTIALS = False
 CORS_ALLOW_ALL_ORIGINS = True
+
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:3001",
+    "http://localhost:3000",
+    "https://eventified.liara.run",
+]
+
+CORS_ORIGIN_WHITELIST=(
+    "https://eventified.liara.run",
+    'http://localhost:3000',
+    'http://localhost:3001',
+    'http://localhost:3002',
+    'http://localhost:3003',
+    'http://localhost:3004',
+    
+)
 
 CORS_ALLOW_METHODS = [
   "DELETE",
