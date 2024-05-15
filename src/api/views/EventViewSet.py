@@ -182,8 +182,14 @@ class EventViewSet(ModelViewSet):
     @swagger_auto_schema(operation_summary = "List of comments under event")
     @action(detail = True, methods = ["GET"])
     def comments(self, request, pk = None):
-        queryset = models.Comment.objects.filter(Q(event_id = pk) & Q(parent_id = None))
-        serializer = self.get_serializer(queryset, many = True)
+        queryset = models.Comment.objects \
+            .prefetch_related("children", "liked_by") \
+            .select_related("user", "event") \
+            .filter(Q(event_id = pk) & Q(parent_id = None))
+    
+        serializer = self.get_serializer(queryset, 
+                                         many = True,
+                                         context = {"request_user": request.user.id})
         return Response({"comments": serializer.data})    
         
 
