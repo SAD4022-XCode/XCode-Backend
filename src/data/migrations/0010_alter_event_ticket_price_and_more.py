@@ -18,11 +18,11 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name="inpersonevent",
             name="location_lat",
-            field=models.DecimalField(decimal_places=20, max_digits=22),
+            field=models.DecimalField(decimal_places=15, max_digits=17),
         ),
         migrations.AlterField(
             model_name="inpersonevent",
             name="location_lon",
-            field=models.DecimalField(decimal_places=20, max_digits=22),
+            field=models.DecimalField(decimal_places=15, max_digits=18),
         ),
     ]
