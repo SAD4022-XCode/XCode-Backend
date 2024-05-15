@@ -14,7 +14,10 @@ from service import serializers
 from service import pagination
 
 class CommentViewSet(viewsets.ModelViewSet):
-    queryset = models.Comment.objects.prefetch_related("children", "liked_by").select_related("user", "event").all()
+    queryset = models.Comment.objects \
+        .prefetch_related("children", "liked_by") \
+        .select_related("user", "event") \
+        .all()
     serializer_class = serializers.CommentSerializer
     parser_classes = [parsers.JSONParser, parsers.MultiPartParser]
     pagination_class = pagination.CustomPagination
