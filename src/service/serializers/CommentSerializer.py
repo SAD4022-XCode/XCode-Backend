@@ -11,7 +11,6 @@ class CommentSerializer(serializers.ModelSerializer):
     username = serializers.CharField(source = "user.username")
     liked_by = serializers.PrimaryKeyRelatedField(queryset = models.User.objects.all(),
                                                   many = True)
-
     class Meta:
         model = models.Comment
 
@@ -36,13 +35,5 @@ class CommentSerializer(serializers.ModelSerializer):
             representation["has_liked"] = True
         else:
             representation["has_liked"] = False
-        
-        serializer = CommentSerializer(instance.children \
-                                        .prefetch_related("children", "liked_by") \
-                                        .select_related("user", "event") \
-                                        .all(), 
-                                       many = True, 
-                                       context = self.context)
-        representation["replies"] = serializer.data
         
         return representation
