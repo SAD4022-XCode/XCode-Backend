@@ -37,9 +37,3 @@ class UserProfile(models.Model):
     
     def delete_profile_picture(self):
         self.profile_picture.delete(save = True)
-
-    @property
-    def profile_picture_url(self):
-        if not self.profile_picture:
-            return None
-        return self.profile_picture.url
