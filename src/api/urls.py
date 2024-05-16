@@ -11,6 +11,7 @@ router = routers.DefaultRouter()
 router.register("account", views.UserProfileViewSet, basename = "account")
 router.register("events", views.EventViewSet, basename = "events")
 router.register("comments", views.CommentViewSet, basename = "comments")
+router.register("ratings", views.RatingViewSet, basename = "ratings")
 
 urlpatterns += router.urls
 
