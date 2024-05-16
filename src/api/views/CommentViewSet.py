@@ -16,7 +16,7 @@ from service import pagination
 class CommentViewSet(viewsets.ModelViewSet):
     queryset = models.Comment.objects \
         .prefetch_related("children", "liked_by") \
-        .select_related("user", "event") \
+        .select_related("user", "user__userprofile", "event") \
         .all()
     serializer_class = serializers.CommentSerializer
     parser_classes = [parsers.JSONParser, parsers.MultiPartParser]

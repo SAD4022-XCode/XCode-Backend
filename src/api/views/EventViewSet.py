@@ -184,7 +184,7 @@ class EventViewSet(ModelViewSet):
     def comments(self, request, pk = None):
         queryset = models.Comment.objects \
             .prefetch_related("children", "liked_by") \
-            .select_related("user", "event") \
+            .select_related("user", "user__userprofile", "event") \
             .filter(Q(event_id = pk) & Q(parent_id = None))
     
         serializer = self.get_serializer(queryset, 
