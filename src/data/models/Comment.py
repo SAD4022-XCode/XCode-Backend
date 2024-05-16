@@ -18,3 +18,15 @@ class Comment(models.Model):
                                 blank = True,
                                 related_name = "children")
     liked_by = models.ManyToManyField(AppModels.User)
+
+    @property
+    def replies(self):
+        children = []
+
+        for child in Comment.objects.select_related("parent").filter(parent_id = self.id):
+            children.append(child)
+            _children = child.replies
+            if len(_children) > 0:
+                children.extend(_children)
+        
+        return children
