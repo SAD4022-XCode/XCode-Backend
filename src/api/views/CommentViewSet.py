@@ -61,19 +61,28 @@ class CommentViewSet(viewsets.ModelViewSet):
         if page is not None:
             serializer = self.get_serializer(page, 
                                              many = True, 
-                                             context = {"request_user": request.user.id})
+                                             context = {
+                                                 "request_user": request.user.id,
+                                                 "request": request,
+                                                        })
             return self.get_paginated_response(serializer.data)
 
         serializer = self.get_serializer(queryset, 
                                          many = True, 
-                                         context = {"request_user": request.user.id})
+                                         context = {
+                                             "request_user": request.user.id,
+                                             "request": request,
+                                             })
         return Response(serializer.data)
     
     @swagger_auto_schema(operation_summary = "Retrieve a comment")
     def retrieve(self, request, *args, **kwargs):
         instance = self.get_object()
         serializer = self.get_serializer(instance, 
-                                         context = {"request_user": request.user.id})
+                                         context = {
+                                             "request_user": request.user.id,
+                                             "request": request,
+                                                    })
         return Response(serializer.data)
     
     def update(self, request, *args, **kwargs):

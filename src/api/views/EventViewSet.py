@@ -189,7 +189,10 @@ class EventViewSet(ModelViewSet):
     
         serializer = self.get_serializer(queryset, 
                                          many = True,
-                                         context = {"request_user": request.user.id})
+                                         context = {
+                                             "request_user": request.user.id,
+                                             "request": request,
+                                                    })
         return Response({"comments": serializer.data})    
         
 
