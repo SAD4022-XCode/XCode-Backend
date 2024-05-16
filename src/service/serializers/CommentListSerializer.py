@@ -8,7 +8,7 @@ class CommentListSerializer(serializers.ModelSerializer):
                                               .select_related("userprofile").all())
     event = serializers.PrimaryKeyRelatedField(queryset = models.Event.objects.all())
     parent = serializers.PrimaryKeyRelatedField(queryset = models.Comment.objects.all())
-    user_photo = serializers.ImageField(source = "user.userprofile.profile_picture")
+    user_photo = serializers.ImageField(source = "user.userprofile.profile_picture_url")
     username = serializers.CharField(source = "user.username")
     has_liked = serializers.SerializerMethodField()
     replies = AppSerializers.CommentSerializer(many = True)
