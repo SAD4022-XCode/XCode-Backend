@@ -7,6 +7,7 @@ from service.serializers.event_serializers import __all__
 from service.serializers.CommentSerializer import CommentSerializer
 from service.serializers.CreateCommentSerializer import CreateCommentSerializer
 from service.serializers.CommentListSerializer import CommentListSerializer
+from service.serializers.RatingSerializer import RatingSerializer
 
 __all__ = [
     UserProfileSerializer,
@@ -17,4 +18,5 @@ __all__ = [
     CommentSerializer,
     CreateCommentSerializer,
     CommentListSerializer,
+    RatingSerializer,
 ]
