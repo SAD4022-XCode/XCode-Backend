@@ -23,8 +23,8 @@ class CommentViewSet(viewsets.ModelViewSet):
     pagination_class = pagination.CustomPagination
 
     serializer_action_classes = {
-        "list": serializers.CommentSerializer,
-        "retrieve": serializers.CommentSerializer,
+        "list": serializers.CommentListSerializer,
+        "retrieve": serializers.CommentListSerializer,
         "create": serializers.CreateCommentSerializer,
         "update": serializers.CreateCommentSerializer,
         "partial_update": serializers.CreateCommentSerializer,

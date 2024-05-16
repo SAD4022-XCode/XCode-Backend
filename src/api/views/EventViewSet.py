@@ -37,7 +37,7 @@ class EventViewSet(ModelViewSet):
         "partial_update": event_serializers.EventDetailSerializer,
         "retrieve": event_serializers.EventDetailSerializer,
         "leave_comment": serializers.CreateCommentSerializer,
-        "comments": serializers.CommentSerializer,
+        "comments": serializers.CommentListSerializer,
     }
 
     def get_serializer_class(self):
