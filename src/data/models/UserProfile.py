@@ -28,9 +28,9 @@ class UserProfile(models.Model):
     gender = models.CharField(max_length = 1, 
                               choices = GENDER_CHOICES, 
                               default = GENDER_UNKNOWN)
-    registered_events = models.JSONField(encoder = None, decoder = None)
+    registered_events = models.JSONField(encoder = None, decoder = None, null = True)
     has_registered = models.BooleanField(default = 0)
-    bookmarked_events = models.JSONField(encoder = None, decoder = None)
+    bookmarked_events = models.JSONField(encoder = None, decoder = None, null = True)
     
     objects = UserProfileManager()
 
