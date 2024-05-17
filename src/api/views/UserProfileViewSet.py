@@ -21,7 +21,8 @@ class UserProfileViewSet(GenericViewSet):
     serializer_action_classes = {
         'me' : serializers.UserProfileSerializer,
         'get_profile_picture': serializers.ProfilePictureSerializer,
-        'set_profile_picture': serializers.ProfilePictureSerializer
+        'set_profile_picture': serializers.ProfilePictureSerializer,
+        'register_event' : serializers.RegisterEventSerializer,
     }
 
 
@@ -91,4 +92,15 @@ class UserProfileViewSet(GenericViewSet):
         serializer = event_serializers.EventSummarySerializer(events, many = True)
 
         return Response(serializer.data)
+        
+    @swagger_auto_schema(operation_summary = "Save user's registeration")
+    @action(detail = False, methods = ['PATCH'], permission_classes = [permissions.IsAuthenticated])
+    def register_event(self, request):
+        instance = UserProfile.objects.select_related("user").get(user_id = request.user.id)
+        if instance is None:
+            return Response(status = status.HTTP_404_NOT_FOUND)
+        serializer = self.get_serializer(instance, data = request.data, partial = True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
         
