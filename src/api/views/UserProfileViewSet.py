@@ -1,4 +1,4 @@
-from django.http import HttpRequest, FileResponse
+from django.http import HttpRequest, FileResponse, JsonResponse
 from rest_framework.viewsets import GenericViewSet
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -90,4 +90,11 @@ class UserProfileViewSet(GenericViewSet):
         serializer = serializers.EventSerializer(events, many = True)
 
         return Response(serializer.data)
-        
+    
+    @swagger_auto_schema(operation_summary = "Save user's registeration")
+    @action(detail = False, methods = ['POST'], permission_classes = [permissions.IsAuthenticated])
+    def register_event(self, request):
+        serializer = serializers.EventSerializer(data = request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)

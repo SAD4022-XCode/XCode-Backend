@@ -17,6 +17,7 @@ class UserProfileSerializer(serializers.ModelSerializer):
             'profile_picture',
             'wallet',
             'registered_events',
+            'has_registered',
             'bookmarked_events'
         ]
 

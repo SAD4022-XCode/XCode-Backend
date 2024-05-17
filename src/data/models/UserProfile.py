@@ -29,6 +29,7 @@ class UserProfile(models.Model):
                               choices = GENDER_CHOICES, 
                               default = GENDER_UNKNOWN)
     registered_events = models.JSONField(encoder = None, decoder = None)
+    has_registered = models.BooleanField(default = 0)
     bookmarked_events = models.JSONField(encoder = None, decoder = None)
     
     objects = UserProfileManager()
