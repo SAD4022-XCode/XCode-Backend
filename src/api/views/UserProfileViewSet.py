@@ -8,12 +8,12 @@ from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
 
 from drf_yasg.utils import swagger_auto_schema
 
-from data.models import UserProfile, Event
+from data import models
 from service import serializers
 from service.serializers import event_serializers
 
 class UserProfileViewSet(GenericViewSet):
-    queryset = UserProfile.objects.select_related('user').all()
+    queryset = models.UserProfile.objects.select_related('user').all()
     serializer_class = serializers.UserProfileSerializer
     permission_classes = [permissions.AllowAny]
     parser_classes = [JSONParser, MultiPartParser, FormParser]
@@ -36,7 +36,7 @@ class UserProfileViewSet(GenericViewSet):
     @swagger_auto_schema(method = "patch", operation_summary = "Update User Info")
     @action(detail = False, methods = ['GET', 'PUT', 'PATCH'], permission_classes = [permissions.IsAuthenticated])
     def me(self, request: HttpRequest):
-        profile = UserProfile.objects.get_by_id(request.user.id)
+        profile = models.UserProfile.objects.get_by_id(request.user.id)
 
         if request.method == 'GET':
             serializer = self.get_serializer(profile)
@@ -58,7 +58,7 @@ class UserProfileViewSet(GenericViewSet):
     @swagger_auto_schema(operation_summary = "Get user profile photo")
     @action(detail = False, methods = ['GET'], permission_classes = [permissions.IsAuthenticated])
     def get_profile_picture(self, request: HttpRequest):
-        profile = UserProfile.objects.get_by_id(request.user.id)
+        profile = models.UserProfile.objects.get_by_id(request.user.id)
 
         if (not profile.profile_picture):
             return Response('User has no profile photos.', status.HTTP_404_NOT_FOUND)
@@ -71,7 +71,7 @@ class UserProfileViewSet(GenericViewSet):
     @swagger_auto_schema(method = "delete", operation_summary = "Delete user profile photo")
     @action(detail = False, methods = ['PUT', 'DELETE'], permission_classes = [permissions.IsAuthenticated])
     def set_profile_picture(self, request):            
-        profile = UserProfile.objects.get_by_id(request.user.id)
+        profile = models.UserProfile.objects.get_by_id(request.user.id)
 
         if (request.method == 'PUT'):
             serializer = self.get_serializer(profile, data = request.data)
@@ -87,8 +87,17 @@ class UserProfileViewSet(GenericViewSet):
     @swagger_auto_schema(operation_summary = "List of events created by user")
     @action(detail = False, methods = ['GET'], permission_classes = [permissions.IsAuthenticated])    
     def my_events(self, request):
-        events = Event.objects.filter(creator_id = request.user.id)
-        serializer = event_serializers.EventSummarySerializer(events, many = True)
+        queryset = models.Event.objects.filter(creator_id = request.user.id)
+        serializer = event_serializers.EventSummarySerializer(queryset, many = True)
 
         return Response(serializer.data)
+    
+    @swagger_auto_schema(operation_summary = "notification inbox")
+    @action(detail = False, methods = ["GET"], permission_classes = [permissions.IsAuthenticated])
+    def inbox(self, request):
+        queryset = models.Notification.objects.filter(recipient_id = request.user.id)
+        serializer = serializers.NotificationSerializer(queryset, many = True)
+
+        return Response(serializer.data)
+
         
