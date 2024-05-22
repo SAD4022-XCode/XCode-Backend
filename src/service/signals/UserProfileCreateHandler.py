@@ -5,8 +5,7 @@ from django.conf import settings
 from data.models import UserProfile
 
 @receiver(post_save, sender = settings.AUTH_USER_MODEL)
-def UserProfileCreateHandler(sender, instance, created, **kwargs):
+def user_profile_create_handler(sender, instance, created, **kwargs):
     if not created:
         return
-    profile = UserProfile(user = instance)
-    profile.save()
+    UserProfile.objects.create(user = instance)
