@@ -13,6 +13,6 @@ class NotificationSerializer(serializers.ModelSerializer):
             "recipient",
             "title",
             "content",
-            "time",
+            "created_at",
             "is_read",
         ]
