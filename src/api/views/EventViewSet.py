@@ -111,7 +111,10 @@ class EventViewSet(ModelViewSet):
         queryset = self.get_queryset()
         instance = shortcuts.get_object_or_404(queryset, pk = filter_kwargs.get("pk"))
 
-        serializer = self.get_serializer(instance)
+        serializer = self.get_serializer(instance,
+                                         context = {
+                                             "request": request
+                                         })
         return Response(serializer.data)            
     
     @swagger_auto_schema(operation_summary = "Update event")
