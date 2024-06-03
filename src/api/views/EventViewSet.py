@@ -62,6 +62,8 @@ class EventViewSet(ModelViewSet):
             tags = models.Tag.objects.filter(label__in = tag_list)
             filtered_queryset = filtered_queryset.filter(tags__in = tags).distinct()
 
+        filtered_queryset = filtered_queryset.order_by("id").reverse()
+
         page = self.paginate_queryset(filtered_queryset)
         if page is not None:
             serializer = self.get_serializer(page, many=True)
