@@ -32,19 +32,3 @@ class Event(models.Model):
     @property
     def start_date(self):
         return self.starts.date()
-    
-class InPersonEvent(models.Model):
-    event = models.OneToOneField(Event, 
-                                 on_delete = models.CASCADE, 
-                                 primary_key = True)
-    province = models.CharField(max_length = 255)
-    city = models.CharField(max_length = 255)
-    address = models.CharField(max_length = 255)
-    location_lat = models.DecimalField(max_digits = 17, decimal_places = 15)
-    location_lon = models.DecimalField(max_digits = 18, decimal_places = 15)
-
-class OnlineEvent(models.Model):
-    event = models.OneToOneField(Event, 
-                                 on_delete = models.CASCADE,
-                                 primary_key = True)
-    url = models.URLField()
