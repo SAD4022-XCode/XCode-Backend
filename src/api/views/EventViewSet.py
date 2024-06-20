@@ -1,11 +1,14 @@
 from rest_framework.viewsets import ModelViewSet
 from rest_framework.parsers import JSONParser, MultiPartParser
 from rest_framework.response import Response
+from rest_framework.request import Request
 from rest_framework.decorators import action
 from rest_framework import status
+from rest_framework import permissions
 from django.http import HttpRequest
 from django.db import transaction
 from django.db.models import Q
+from django.core import exceptions
 from django_filters import rest_framework as filters
 from django import shortcuts
 from datetime import datetime, timezone
@@ -38,6 +41,7 @@ class EventViewSet(ModelViewSet):
         "retrieve": event_serializers.EventDetailSerializer,
         "leave_comment": serializers.CreateCommentSerializer,
         "comments": serializers.CommentListSerializer,
+        "enroll": serializers.TicketSerializer,
     }
 
     def get_serializer_class(self):
@@ -174,15 +178,60 @@ class EventViewSet(ModelViewSet):
         instance = shortcuts.get_object_or_404(queryset, pk = filter_kwargs.get("pk"))
 
         if instance.creator_id != request.user.id:
-            return Response({"detail": "operation not allowed, you are not the creator of this event"}, 
+            return Response({"detail": "Operation not allowed, you are not the creator of this event"}, 
                             status = status.HTTP_403_FORBIDDEN)
         
         if datetime.now(tz = timezone.utc) > instance.starts:
-            return Response({"detail": "operation not allowed, the event has started"}, 
+            return Response({"detail": "Operation not allowed, the event has started"}, 
                             status = status.HTTP_403_FORBIDDEN)
 
         instance.delete()
         return Response(status = status.HTTP_204_NO_CONTENT)
+    
+    @action(detail = True, methods = ["POST"], permission_classes = [permissions.IsAuthenticated])
+    @transaction.atomic
+    def enroll(self, request: Request, pk = None):
+        request_data = request.data.copy()
+        request_data.update({
+            "attendee": request.user.id,
+            "event": pk,
+        })
+
+        serializer = self.get_serializer(data = request_data)        
+        serializer.is_valid(raise_exception = True)
+        serializer.save()
+
+        event = self.get_object()
+        if event.registered_tickets >= event.maximum_tickets:
+            return Response({"detail": "All tickets are sold out."}, status = status.HTTP_400_BAD_REQUEST)
+
+        userprofile = models.UserProfile.objects \
+            .prefetch_related("enrolled_events") \
+            .get(user_id = request.user.id)
+        
+        if userprofile.enrolled_events.filter(pk = pk).exists():
+            return Response({"detail": "You have already enrolled in this event before."},
+                            status = status.HTTP_400_BAD_REQUEST)
+        
+        if userprofile.has_enrolled:
+            try:
+                userprofile.pay(request_data.get("price"))
+                userprofile.save()
+            except(exceptions.BadRequest):
+                return Response({"detail": "Not enough balance."},
+                                status = status.HTTP_400_BAD_REQUEST)
+        else:
+            userprofile.has_enrolled = True
+            userprofile.save()
+
+        event.registered_tickets += 1
+        event.save()
+
+        return Response({
+            "detail": "enrollment successfull.",
+            }, 
+            status = status.HTTP_200_OK)
+        
     
     @swagger_auto_schema(operation_summary = "List of comments under event")
     @action(detail = True, methods = ["GET"])
