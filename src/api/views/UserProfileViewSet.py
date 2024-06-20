@@ -1,4 +1,5 @@
 from django.http import HttpRequest, FileResponse
+from django import shortcuts
 from rest_framework.viewsets import GenericViewSet
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -27,6 +28,8 @@ class UserProfileViewSet(GenericViewSet):
         "set_profile_picture": serializers.ProfilePictureSerializer,
         "my_events": event_serializers.EventSummarySerializer,
         "inbox": serializers.NotificationSerializer,
+        "deposit": serializers.DepositSerializer,
+        "enrolled_events": event_serializers.EventSummarySerializer,
     }
 
 
@@ -97,6 +100,21 @@ class UserProfileViewSet(GenericViewSet):
 
         return Response(serializer.data)
     
+    @action(detail = False, methods = ["GET"], permission_classes = [permissions.IsAuthenticated])
+    def enrolled_events(self, request):
+        # queryset = models.Ticket.objects \
+        #     .prefetch_related("event", "attendee") \
+        #     .filter(attendee_id = request.user.id)
+        queryset = models.UserProfile.objects \
+            .select_related("user") \
+            .prefetch_related("enrolled_events") \
+            .get(pk = request.user.id) \
+            .enrolled_events
+
+        serializer = self.get_serializer(queryset, many = True)
+
+        return Response(serializer.data, status = status.HTTP_200_OK)
+    
     @swagger_auto_schema(operation_summary = "notification inbox")
     @action(detail = False, methods = ["GET"], permission_classes = [permissions.IsAuthenticated])
     def inbox(self, request):
@@ -104,5 +122,16 @@ class UserProfileViewSet(GenericViewSet):
         serializer = self.get_serializer(queryset, many = True)
 
         return Response(serializer.data)
+    
+    @action(detail = False, methods = ["POST"], permission_classes = [permissions.IsAuthenticated])
+    def deposit(self, request):
+        userprofile = shortcuts.get_object_or_404(self.queryset, pk = request.user.id)
+        deposit_amount = request.data.get("amount")
+
+        userprofile.deposit(deposit_amount)
+        userprofile.save()
+
+        return Response({"detail": f"deposit successfull, your balance: {userprofile.balance}"})
+        
 
         
