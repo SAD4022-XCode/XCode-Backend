@@ -100,11 +100,9 @@ class UserProfileViewSet(GenericViewSet):
 
         return Response(serializer.data)
     
+    @swagger_auto_schema(operation_summary = "list of enrolled events")
     @action(detail = False, methods = ["GET"], permission_classes = [permissions.IsAuthenticated])
     def enrolled_events(self, request):
-        # queryset = models.Ticket.objects \
-        #     .prefetch_related("event", "attendee") \
-        #     .filter(attendee_id = request.user.id)
         queryset = models.UserProfile.objects \
             .select_related("user") \
             .prefetch_related("enrolled_events") \
@@ -123,6 +121,7 @@ class UserProfileViewSet(GenericViewSet):
 
         return Response(serializer.data)
     
+    @swagger_auto_schema(operation_summary = "charge wallet")
     @action(detail = False, methods = ["POST"], permission_classes = [permissions.IsAuthenticated])
     def deposit(self, request):
         userprofile = shortcuts.get_object_or_404(self.queryset, pk = request.user.id)

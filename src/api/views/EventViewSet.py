@@ -188,6 +188,7 @@ class EventViewSet(ModelViewSet):
         instance.delete()
         return Response(status = status.HTTP_204_NO_CONTENT)
     
+    @swagger_auto_schema(operation_summary = "enroll in an event")
     @action(detail = True, methods = ["POST"], permission_classes = [permissions.IsAuthenticated])
     @transaction.atomic
     def enroll(self, request: Request, pk = None):
@@ -199,11 +200,6 @@ class EventViewSet(ModelViewSet):
 
         serializer = self.get_serializer(data = request_data)        
         serializer.is_valid(raise_exception = True)
-        serializer.save()
-
-        event = self.get_object()
-        if event.registered_tickets >= event.maximum_tickets:
-            return Response({"detail": "All tickets are sold out."}, status = status.HTTP_400_BAD_REQUEST)
 
         userprofile = models.UserProfile.objects \
             .prefetch_related("enrolled_events") \
@@ -212,17 +208,22 @@ class EventViewSet(ModelViewSet):
         if userprofile.enrolled_events.filter(pk = pk).exists():
             return Response({"detail": "You have already enrolled in this event before."},
                             status = status.HTTP_400_BAD_REQUEST)
+
+        event = self.get_object()
+        if event.remaining_tickets == 0:
+            return Response({"detail": "All tickets are sold out."}, status = status.HTTP_400_BAD_REQUEST)
         
         if userprofile.has_enrolled:
             try:
                 userprofile.pay(request_data.get("price"))
-                userprofile.save()
             except(exceptions.BadRequest):
                 return Response({"detail": "Not enough balance."},
                                 status = status.HTTP_400_BAD_REQUEST)
         else:
             userprofile.has_enrolled = True
-            userprofile.save()
+
+        userprofile.save()
+        serializer.save()
 
         event.registered_tickets += 1
         event.save()
