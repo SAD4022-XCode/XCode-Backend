@@ -8,6 +8,8 @@ from service.serializers.CommentSerializer import CommentSerializer
 from service.serializers.CreateCommentSerializer import CreateCommentSerializer
 from service.serializers.CommentListSerializer import CommentListSerializer
 from service.serializers.NotificationSerializer import NotificationSerializer
+from service.serializers.TicketSerializer import TicketSerializer
+from service.serializers.DepositSerializer import DepositSerializer
 
 __all__ = [
     UserProfileSerializer,
@@ -19,4 +21,6 @@ __all__ = [
     CreateCommentSerializer,
     CommentListSerializer,
     NotificationSerializer,
+    TicketSerializer,
+    DepositSerializer,
 ]
