@@ -7,6 +7,9 @@ from data.models.Tag import Tag
 from data.models.Comment import Comment
 from data.models.Notification import Notification
 from data.models.Ticket import Ticket
+from data.models.Conversation import Conversation
+from data.models.Message import Message
+from data.models.UserConversation import UserConversation
 
 __all__ = [
     User,
@@ -18,4 +21,7 @@ __all__ = [
     Comment,
     Notification,
     Ticket,
+    Conversation,
+    Message,
+    UserConversation,
 ]
