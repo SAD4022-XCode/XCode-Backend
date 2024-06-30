@@ -3,4 +3,6 @@ from django.db import models
 
 class User(AbstractUser):
     email = models.EmailField(unique = True)
-    conversations = models.ManyToManyField("Conversation", through = "UserConversation")
+    conversations = models.ManyToManyField("Conversation", 
+                                           through = "UserConversation", 
+                                           related_name = "participants")
