@@ -12,7 +12,6 @@ from service.serializers.TicketSerializer import TicketSerializer
 from service.serializers.DepositSerializer import DepositSerializer
 from service.serializers.MessageSerializer import MessageSerializer
 from service.serializers.ConversationSerializer import ConversationSerializer
-from service.serializers.ConversationCreateSerializer import ConversationCreateSerializer
 from service.serializers.MessageCreateSerializer import MessageCreateSerializer
 
 __all__ = [
@@ -29,6 +28,5 @@ __all__ = [
     DepositSerializer,
     MessageSerializer,
     ConversationSerializer,
-    ConversationCreateSerializer,
     MessageCreateSerializer,
 ]
