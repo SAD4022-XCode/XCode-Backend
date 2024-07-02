@@ -131,6 +131,15 @@ class UserProfileViewSet(GenericViewSet):
         userprofile.save()
 
         return Response({"detail": f"deposit successfull, your balance: {userprofile.balance}"})
-        
+    
+    @action(detail = False, methods = ["GET"], permission_classes = [permissions.IsAuthenticated])
+    def conversations(self, request):
+        user_id = request.user.id
+        user = models.User.objects.prefetch_related("conversations").get(pk = user_id)
+        conversations = user.conversations.all()
+       
+        serializer = serializers.ConversationSerializer(conversations, many = True)
+       
+        return Response(serializer.data)
 
         
