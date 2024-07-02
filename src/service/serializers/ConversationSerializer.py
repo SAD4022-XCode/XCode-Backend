@@ -4,7 +4,7 @@ from data import models
 from service import serializers as AppSerializers
 
 class ConversationSerializer(serializers.ModelSerializer):
-    participants = AppSerializers.MyUserSerializer(source = "participants")
+    participants = AppSerializers.MyUserSerializer(many = True, read_only = True)
 
     class Meta:
         model = models.Conversation
@@ -19,6 +19,7 @@ class ConversationSerializer(serializers.ModelSerializer):
         last_message = models.Message.objects \
             .filter(conversation_id = instance.id) \
             .last()
-        representation["last_message"] = last_message
+        serializer = AppSerializers.MessageSerializer(last_message)
+        representation["last_message"] = serializer.data
 
         return representation
