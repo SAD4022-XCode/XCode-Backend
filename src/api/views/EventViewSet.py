@@ -60,6 +60,13 @@ class EventViewSet(ModelViewSet):
         filter = EventFilter(request.GET, queryset = filtered_queryset)
         filtered_queryset = filter.qs
         
+        if request.user.is_authenticated:
+            user = request.user
+            enrolled_events = request.user.userprofile.enrolled_events
+        else:
+            user = None
+            enrolled_events = None
+
         if (request.GET.get("tags") is not None):
             tag_list = request.GET.get("tags").strip().split(', ')
 
@@ -70,10 +77,20 @@ class EventViewSet(ModelViewSet):
 
         page = self.paginate_queryset(filtered_queryset)
         if page is not None:
-            serializer = self.get_serializer(page, many=True)
+            serializer = self.get_serializer(page, 
+                                             many = True,
+                                             context = {
+                                             "user": user,
+                                             "enrolled_events": enrolled_events,
+                                         })
             return self.get_paginated_response(serializer.data)
 
-        serializer = self.get_serializer(filtered_queryset, many=True)
+        serializer = self.get_serializer(filtered_queryset, 
+                                         many = True,
+                                         context = {
+                                             "user": user,
+                                             "enrolled_events": enrolled_events,
+                                         })
         return Response(serializer.data)
 
     @swagger_auto_schema(operation_summary = "Create a new event")
@@ -117,9 +134,18 @@ class EventViewSet(ModelViewSet):
         queryset = self.get_queryset()
         instance = shortcuts.get_object_or_404(queryset, pk = filter_kwargs.get("pk"))
 
+        if request.user.is_authenticated:
+            user = request.user
+            enrolled_events = user.userprofile.enrolled_events
+        else:
+            user = None
+            enrolled_events = None
+
         serializer = self.get_serializer(instance,
                                          context = {
-                                             "request": request
+                                             "request": request,
+                                             "user": user,
+                                             "enrolled_events": enrolled_events
                                          })
         return Response(serializer.data)            
     

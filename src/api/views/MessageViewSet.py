@@ -31,8 +31,8 @@ class MessageViewSet(mixins.CreateModelMixin,
     @transaction.atomic
     def create(self, request: Request, *args, **kwargs):
         data = request.data.copy()
-        sender = models.User.objects.prefetch_related("conversations").get(pk = data.get("sender"))
-        recipient = models.User.objects.prefetch_related("conversations").get(pk = data.get("recipient"))
+        sender = models.UserProfile.objects.prefetch_related("conversations").get(pk = data.get("sender"))
+        recipient = models.UserProfile.objects.prefetch_related("conversations").get(pk = data.get("recipient"))
 
         sender_conversations = sender.conversations.all()
         recipient_conversations = recipient.conversations.all()
@@ -51,12 +51,10 @@ class MessageViewSet(mixins.CreateModelMixin,
         data.update({
             "conversation": conversation.id,
         })
-        print(conversation.id)
-        print(data)
 
         serializer = self.get_serializer(data = data)
-        print(serializer)
         serializer.is_valid(raise_exception = True)
         self.perform_create(serializer)
         headers = self.get_success_headers(serializer.data)
         return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+        

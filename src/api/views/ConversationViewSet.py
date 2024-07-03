@@ -40,5 +40,9 @@ class ConversationViewSet(mixins.ListModelMixin,
     def message_history(self, request, pk = None):
         conversation = self.get_object()
         messages = conversation.message_history
-        serializer = serializers.MessageSerializer(messages, many = True)
+        serializer = serializers.MessageSerializer(messages, 
+                                                   many = True,
+                                                   context = {
+                                                       "request": request,
+                                                   })
         return Response(serializer.data)

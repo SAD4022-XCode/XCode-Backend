@@ -109,7 +109,8 @@ class UserProfileViewSet(GenericViewSet):
             .get(pk = request.user.id) \
             .enrolled_events
 
-        serializer = self.get_serializer(queryset, many = True)
+        serializer = self.get_serializer(queryset,
+                                         many = True)
 
         return Response(serializer.data, status = status.HTTP_200_OK)
     
@@ -135,10 +136,15 @@ class UserProfileViewSet(GenericViewSet):
     @action(detail = False, methods = ["GET"], permission_classes = [permissions.IsAuthenticated])
     def conversations(self, request):
         user_id = request.user.id
-        user = models.User.objects.prefetch_related("conversations").get(pk = user_id)
-        conversations = user.conversations.all()
+        user = models.UserProfile.objects.select_related("user").prefetch_related("conversations").get(pk = user_id)
+        conversations = user.conversations.prefetch_related("participants").all()
        
-        serializer = serializers.ConversationSerializer(conversations, many = True)
+        serializer = serializers.ConversationSerializer(conversations, 
+                                                        many = True,
+                                                        context = {
+                                                            "request": request,
+                                                            "user_id": request.user.id,
+                                                        })
        
         return Response(serializer.data)
 
