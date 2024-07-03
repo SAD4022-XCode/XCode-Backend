@@ -8,7 +8,7 @@ def new_message_notification(sender, instance, created, **kwargs):
     if not created:
         return
 
-    message_sender_name = models.UserPofile.objects \
+    message_sender_name = models.UserProfile.objects \
         .select_related("user") \
         .filter(user_id = instance.sender_id) \
         .first() \
@@ -18,11 +18,11 @@ def new_message_notification(sender, instance, created, **kwargs):
         .prefetch_related("participants") \
         .get(pk = instance.conversation_id) \
         .participants \
-        .exclude(id = instance.sender_id) \
+        .exclude(pk = instance.sender_id) \
         .all()
 
     notifications = [
-        models.Notification(recipient_id = recipient.id,
+        models.Notification(recipient_id = recipient.pk,
                                            title = f"New message from {message_sender_name}",
                                            content = instance.content)
         for recipient in recipients    
