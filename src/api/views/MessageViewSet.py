@@ -19,7 +19,7 @@ class MessageViewSet(mixins.CreateModelMixin,
     ]
 
     serializer_action_classes = {
-        "create": serializers.MessageCreateSerializer,
+        "create": serializers.MessageCreateInputSerializer,
     }
 
     def get_serializer_class(self):
@@ -30,8 +30,12 @@ class MessageViewSet(mixins.CreateModelMixin,
 
     @transaction.atomic
     def create(self, request: Request, *args, **kwargs):
+        if not request.user.is_authenticated:
+            return Response({"detail": "Authentication credentials were not provided"},
+                            status = status.HTTP_401_UNAUTHORIZED)
+
         data = request.data.copy()
-        sender = models.UserProfile.objects.prefetch_related("conversations").get(pk = data.get("sender"))
+        sender = models.UserProfile.objects.prefetch_related("conversations").get(pk = request.user.id)
         recipient = models.UserProfile.objects.prefetch_related("conversations").get(pk = data.get("recipient"))
 
         sender_conversations = sender.conversations.all()
@@ -49,10 +53,12 @@ class MessageViewSet(mixins.CreateModelMixin,
             conversation = (sender_conversations & recipient_conversations).first()
 
         data.update({
+            "sender": sender.pk,
             "conversation": conversation.id,
         })
 
-        serializer = self.get_serializer(data = data)
+        print (data)
+        serializer = serializers.MessageCreateSerializer(data = data)
         serializer.is_valid(raise_exception = True)
         self.perform_create(serializer)
         headers = self.get_success_headers(serializer.data)
