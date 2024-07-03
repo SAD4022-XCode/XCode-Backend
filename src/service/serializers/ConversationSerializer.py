@@ -9,6 +9,7 @@ class ConversationSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.Conversation
         fields = [
+            "id",
             "created_at",
             "participants",
         ]
