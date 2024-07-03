@@ -30,6 +30,7 @@ class UserProfileViewSet(GenericViewSet):
         "inbox": serializers.NotificationSerializer,
         "deposit": serializers.DepositSerializer,
         "enrolled_events": event_serializers.EventSummarySerializer,
+        "conversations": serializers.ConversationSerializer,
     }
 
 
