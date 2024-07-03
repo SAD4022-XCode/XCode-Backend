@@ -13,6 +13,7 @@ from service.serializers.DepositSerializer import DepositSerializer
 from service.serializers.MessageSerializer import MessageSerializer
 from service.serializers.ConversationSerializer import ConversationSerializer
 from service.serializers.MessageCreateSerializer import MessageCreateSerializer
+from service.serializers.MessageCreateInputSerializer import MessageCreateInputSerializer
 
 __all__ = [
     UserProfileSerializer,
@@ -29,4 +30,5 @@ __all__ = [
     MessageSerializer,
     ConversationSerializer,
     MessageCreateSerializer,
+    MessageCreateInputSerializer,
 ]
