@@ -3,7 +3,7 @@ from django.db import models
 from data import models as AppModels
 
 class Message(models.Model):
-    sender = models.ForeignKey(AppModels.User, on_delete = models.CASCADE)
+    sender = models.ForeignKey(AppModels.UserProfile, on_delete = models.CASCADE)
     conversation = models.ForeignKey(AppModels.Conversation, 
                                      on_delete = models.CASCADE, 
                                      related_name = "message_history")

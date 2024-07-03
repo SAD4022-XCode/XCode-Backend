@@ -34,6 +34,10 @@ class UserProfile(models.Model):
     enrolled_events = models.ManyToManyField(Event, through = "Ticket")
     has_enrolled = models.BooleanField(default = False)
     
+    conversations = models.ManyToManyField("Conversation", 
+                                           through = "UserConversation", 
+                                           related_name = "participants")
+    
     objects = UserProfileManager()
 
     def get_profile_picture(self):
