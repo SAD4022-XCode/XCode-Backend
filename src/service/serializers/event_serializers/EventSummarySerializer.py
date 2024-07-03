@@ -31,3 +31,17 @@ class EventSummarySerializer(serializers.ModelSerializer):
             "city",
             "tags",
         ]
+
+    def to_representation(self, instance):
+        representation = super().to_representation(instance)
+
+        if self.context.get("user") is None:
+            return representation
+        
+        enrolled_events = self.context.get("enrolled_events")
+        if enrolled_events.filter(id = instance.id).exists():
+            representation["enrolled"] = True
+        else:
+            representation["enrolled"] = False
+        
+        return representation
