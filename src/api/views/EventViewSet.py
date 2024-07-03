@@ -82,6 +82,7 @@ class EventViewSet(ModelViewSet):
                                              context = {
                                              "user": user,
                                              "enrolled_events": enrolled_events,
+                                             "request": request,
                                          })
             return self.get_paginated_response(serializer.data)
 
@@ -90,6 +91,7 @@ class EventViewSet(ModelViewSet):
                                          context = {
                                              "user": user,
                                              "enrolled_events": enrolled_events,
+                                             "request": request,
                                          })
         return Response(serializer.data)
 
