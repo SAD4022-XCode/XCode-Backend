@@ -6,4 +6,5 @@ class ServiceConfig(AppConfig):
     name = 'service'
 
     def ready(self) -> None:
-        from .signals import UserProfileCreateHandler
+        from service.signals import UserProfileCreateHandler
+        from service.signals import NotificationCreateHandler
