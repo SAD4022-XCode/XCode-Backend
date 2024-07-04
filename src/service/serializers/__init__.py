@@ -14,6 +14,7 @@ from service.serializers.MessageSerializer import MessageSerializer
 from service.serializers.ConversationSerializer import ConversationSerializer
 from service.serializers.MessageCreateSerializer import MessageCreateSerializer
 from service.serializers.MessageCreateInputSerializer import MessageCreateInputSerializer
+from service.serializers.AnalyticsSerializer import AnalyticsSerializer
 
 __all__ = [
     UserProfileSerializer,
@@ -31,4 +32,5 @@ __all__ = [
     ConversationSerializer,
     MessageCreateSerializer,
     MessageCreateInputSerializer,
+    AnalyticsSerializer,
 ]
