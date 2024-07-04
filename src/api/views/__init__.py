@@ -6,6 +6,7 @@ from api.views.NotificationViewSet import NotificationViewSet
 from api.views.ConversationViewSet import ConversationViewSet
 from api.views.MessageViewSet import MessageViewSet
 from api.views.UserListView import UserList
+from api.views.AnalyticsView import Analytics
 
 __all__ = [
     UserProfileViewSet,
@@ -16,4 +17,5 @@ __all__ = [
     ConversationViewSet,
     MessageViewSet,
     UserList,
+    Analytics,
 ]

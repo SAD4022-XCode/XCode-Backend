@@ -4,7 +4,7 @@ from . import views
 
 urlpatterns = [
     path("all_users/", views.UserList, name = "all"),
-    # path("conversations", views.ConversationViewSet.as_view(), name = "conversations"),
+    path("analytics/", views.Analytics, name = "analytics"),
 ]
 
 router = routers.DefaultRouter()
