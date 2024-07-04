@@ -17,7 +17,10 @@ def Analytics(request):
     inperson_events = queryset.filter(attendance = 'I')
     online_events = queryset.filter(attendance = 'O')
 
+    registered_users = models.User.objects.all().count()
+
     response = {
+        "registered_users": registered_users,
         "free_inperson_events": (free_events & inperson_events).count(),
         "paid_inperson_events": (paid_events & inperson_events).count(),
         "free_online_events": (free_events & online_events).count(),
