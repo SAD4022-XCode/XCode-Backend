@@ -1,7 +1,7 @@
 from rest_framework import serializers
 
 class AnalyticsSerializer(serializers.Serializer):
-    free_events = serializers.IntegerField()
-    paid_events = serializers.IntegerField()
-    in_person_events = serializers.IntegerField()
-    online_events = serializers.IntegerField()
+    free_inperson_events = serializers.IntegerField()
+    paid_inperson_events = serializers.IntegerField()
+    free_online_events = serializers.IntegerField()
+    paid_online_events = serializers.IntegerField()

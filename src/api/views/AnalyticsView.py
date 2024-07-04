@@ -11,17 +11,17 @@ from service import serializers
 def Analytics(request):
     queryset = models.Event.objects.all()
     
-    free_events = queryset.filter(is_paid = False).count()
-    paid_events = queryset.filter(is_paid = True).count()
+    free_events = queryset.filter(is_paid = False)
+    paid_events = queryset.filter(is_paid = True)
 
-    in_person_events = queryset.filter(attendance = 'I').count()
-    online_events = queryset.filter(attendance = 'O').count()
+    inperson_events = queryset.filter(attendance = 'I')
+    online_events = queryset.filter(attendance = 'O')
 
     response = {
-        "free_events": free_events,
-        "paid_events": paid_events,
-        "in_person_events": in_person_events,
-        "online_events": online_events,
+        "free_inperson_events": (free_events & inperson_events).count(),
+        "paid_inperson_events": (paid_events & inperson_events).count(),
+        "free_online_events": (free_events & online_events).count(),
+        "paid_online_events": (paid_events & online_events).count(),
     }
 
     serializer = serializers.AnalyticsSerializer(data = response)
