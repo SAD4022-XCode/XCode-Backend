@@ -14,7 +14,7 @@ from service import serializers
 from service.serializers import event_serializers
 
 class UserProfileViewSet(GenericViewSet):
-    queryset = models.UserProfile.objects.select_related('user').all()
+    queryset = models.UserProfile.objects.select_related('user').prefetch_related("bookmarked_events").all()
     serializer_class = serializers.UserProfileSerializer
     parser_classes = [
         JSONParser, 
@@ -30,6 +30,7 @@ class UserProfileViewSet(GenericViewSet):
         "inbox": serializers.NotificationSerializer,
         "deposit": serializers.DepositSerializer,
         "enrolled_events": event_serializers.EventSummarySerializer,
+        "bookmarked_events": event_serializers.EventSummarySerializer,
         "conversations": serializers.ConversationSerializer,
     }
 
@@ -114,6 +115,14 @@ class UserProfileViewSet(GenericViewSet):
                                          many = True)
 
         return Response(serializer.data, status = status.HTTP_200_OK)
+    
+    @action(detail = False, methods = ["GET"], permission_classes = [permissions.IsAuthenticated])
+    def bookmarked_events(self, request):
+        events = self.queryset.get(pk = request.user.id).bookmarked_events.all()
+        serializer = event_serializers.EventSummarySerializer(events, many = True)
+
+        return Response(serializer.data, status = status.HTTP_200_OK)
+
     
     @swagger_auto_schema(operation_summary = "notification inbox")
     @action(detail = False, methods = ["GET"], permission_classes = [permissions.IsAuthenticated])
