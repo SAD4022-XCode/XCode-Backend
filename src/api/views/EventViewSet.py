@@ -42,6 +42,7 @@ class EventViewSet(ModelViewSet):
         "leave_comment": serializers.CreateCommentSerializer,
         "comments": serializers.CommentListSerializer,
         "enroll": serializers.TicketSerializer,
+        "bookmark": None,
     }
 
     def get_serializer_class(self):
@@ -260,8 +261,24 @@ class EventViewSet(ModelViewSet):
             "detail": "enrollment successfull.",
             }, 
             status = status.HTTP_200_OK)
+
+    @action(detail = True, methods = ["POST"], permission_classes = [permissions.IsAuthenticated])
+    def bookmark(self, request, pk = None):
+        user = models.UserProfile.objects \
+            .prefetch_related("bookmarked_events") \
+            .get(pk = request.user.id)
         
-    
+        event = self.get_object()
+
+        if user.bookmarked_events.filter(pk = pk).exists():
+            user.bookmarked_events.remove(event)
+            response = {"detail": "event was removed from bookmarks."}
+        else:
+            user.bookmarked_events.add(event)
+            response = {"detail": "event was bookmarked."}
+
+        return Response(response, status = status.HTTP_200_OK)
+
     @swagger_auto_schema(operation_summary = "List of comments under event")
     @action(detail = True, methods = ["GET"])
     def comments(self, request, pk = None):
