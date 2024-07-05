@@ -33,6 +33,7 @@ class UserProfile(models.Model):
                               default = GENDER_UNKNOWN)
     enrolled_events = models.ManyToManyField(Event, through = "Ticket")
     has_enrolled = models.BooleanField(default = False)
+    bookmarked_events = models.ManyToManyField(Event, through = "EventBookmark", related_name = "bookmarked_by")
     
     conversations = models.ManyToManyField("Conversation", 
                                            through = "UserConversation", 
