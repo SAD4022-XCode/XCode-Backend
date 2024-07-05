@@ -10,6 +10,7 @@ from data.models.Ticket import Ticket
 from data.models.Conversation import Conversation
 from data.models.Message import Message
 from data.models.UserConversation import UserConversation
+from data.models.EventBookmark import EventBookmark
 
 __all__ = [
     User,
@@ -24,4 +25,5 @@ __all__ = [
     Conversation,
     Message,
     UserConversation,
+    EventBookmark,
 ]
