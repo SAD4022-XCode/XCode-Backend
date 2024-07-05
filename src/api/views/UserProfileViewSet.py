@@ -123,7 +123,6 @@ class UserProfileViewSet(GenericViewSet):
 
         return Response(serializer.data, status = status.HTTP_200_OK)
 
-    
     @swagger_auto_schema(operation_summary = "notification inbox")
     @action(detail = False, methods = ["GET"], permission_classes = [permissions.IsAuthenticated])
     def inbox(self, request):
