@@ -35,7 +35,7 @@ class EventSummarySerializer(serializers.ModelSerializer):
     def to_representation(self, instance):
         representation = super().to_representation(instance)
 
-        if self.context.get("user") is None:
+        if self.context.get("userprofile") is None:
             return representation
         
         enrolled_events = self.context.get("enrolled_events")
@@ -43,5 +43,11 @@ class EventSummarySerializer(serializers.ModelSerializer):
             representation["enrolled"] = True
         else:
             representation["enrolled"] = False
+
+        bookmarked_events = self.context.get("bookmarked_events")
+        if bookmarked_events.filter(id = instance.id).exists():
+            representation["bookmarked"] = True
+        else:
+            representation["bookmarked"] = False
         
         return representation

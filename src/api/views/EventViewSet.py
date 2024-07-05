@@ -62,11 +62,15 @@ class EventViewSet(ModelViewSet):
         filtered_queryset = filter.qs
         
         if request.user.is_authenticated:
-            user = request.user
-            enrolled_events = request.user.userprofile.enrolled_events
+            userprofile = models.UserProfile.objects \
+                .prefetch_related("enrolled_events", "bookmarked_events") \
+                .get(pk = request.user.id)
+            enrolled_events = userprofile.enrolled_events
+            bookmarked_events = userprofile.bookmarked_events
         else:
-            user = None
+            userprofile = None
             enrolled_events = None
+            bookmarked_events = None
 
         if (request.GET.get("tags") is not None):
             tag_list = request.GET.get("tags").strip().split(', ')
@@ -81,18 +85,20 @@ class EventViewSet(ModelViewSet):
             serializer = self.get_serializer(page, 
                                              many = True,
                                              context = {
-                                             "user": user,
-                                             "enrolled_events": enrolled_events,
                                              "request": request,
+                                             "userprofile": userprofile,
+                                             "enrolled_events": enrolled_events,
+                                             "bookmarked_events": bookmarked_events,
                                          })
             return self.get_paginated_response(serializer.data)
 
         serializer = self.get_serializer(filtered_queryset, 
                                          many = True,
                                          context = {
-                                             "user": user,
-                                             "enrolled_events": enrolled_events,
                                              "request": request,
+                                             "userprofile": userprofile,
+                                             "enrolled_events": enrolled_events,
+                                             "bookmarked_events": bookmarked_events,
                                          })
         return Response(serializer.data)
 
@@ -138,17 +144,22 @@ class EventViewSet(ModelViewSet):
         instance = shortcuts.get_object_or_404(queryset, pk = filter_kwargs.get("pk"))
 
         if request.user.is_authenticated:
-            user = request.user
-            enrolled_events = user.userprofile.enrolled_events
+            userprofile = models.UserProfile.objects \
+                .prefetch_related("enrolled_events", "bookmarked_events") \
+                .get(pk = request.user.id)
+            enrolled_events = userprofile.enrolled_events
+            bookmarked_events = userprofile.bookmarked_events
         else:
-            user = None
+            userprofile = None
             enrolled_events = None
+            bookmarked_events = None
 
         serializer = self.get_serializer(instance,
                                          context = {
                                              "request": request,
-                                             "user": user,
-                                             "enrolled_events": enrolled_events
+                                             "userprofile": userprofile,
+                                             "enrolled_events": enrolled_events,
+                                             "bookmarked_events": bookmarked_events,
                                          })
         return Response(serializer.data)            
     
