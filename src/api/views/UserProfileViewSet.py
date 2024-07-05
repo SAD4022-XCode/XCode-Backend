@@ -119,7 +119,11 @@ class UserProfileViewSet(GenericViewSet):
     @action(detail = False, methods = ["GET"], permission_classes = [permissions.IsAuthenticated])
     def bookmarked_events(self, request):
         events = self.queryset.get(pk = request.user.id).bookmarked_events.all()
-        serializer = event_serializers.EventSummarySerializer(events, many = True)
+        serializer = event_serializers.EventSummarySerializer(events, 
+                                                              many = True,
+                                                              context = {
+                                                                  "request": request,
+                                                              })
 
         return Response(serializer.data, status = status.HTTP_200_OK)
 
